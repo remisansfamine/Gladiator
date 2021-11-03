@@ -14,4 +14,11 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 {
 	GENERATED_BODY()
 	
+public :
+	APlayerCharacter();
+
+protected:
+	// APawn interface
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// End of APawn interface
 };
