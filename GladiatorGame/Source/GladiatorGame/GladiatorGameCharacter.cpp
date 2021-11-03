@@ -27,6 +27,7 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	DeactivateCamera();
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>("FollowCamera");
@@ -34,9 +35,19 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
-	lifeComponent->SetLife(5);
 }
 
+void AGladiatorGameCharacter::ActivateCamera() 
+{ 
+	CameraBoom->Activate(); 
+}
+
+void AGladiatorGameCharacter::DeactivateCamera() 
+{ 
+	CameraBoom->Deactivate(); 
+}
+
+/*
 void AGladiatorGameCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
@@ -47,12 +58,10 @@ void AGladiatorGameCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGladiatorGameCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGladiatorGameCharacter::MoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
+*/
 
 void AGladiatorGameCharacter::MoveForward(float Value)
 {
