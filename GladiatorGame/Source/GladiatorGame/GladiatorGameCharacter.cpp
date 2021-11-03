@@ -35,6 +35,9 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
+	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
+
+	canMove = true;
 }
 
 void AGladiatorGameCharacter::ActivateCamera() 
@@ -47,21 +50,11 @@ void AGladiatorGameCharacter::DeactivateCamera()
 	CameraBoom->Deactivate(); 
 }
 
-/*
-void AGladiatorGameCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void AGladiatorGameCharacter::OnDeath()
 {
-	// Set up gameplay key bindings
-	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &AGladiatorGameCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AGladiatorGameCharacter::MoveRight);
-
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
+	canMove = false;
 }
-*/
 
 void AGladiatorGameCharacter::MoveForward(float Value)
 {
@@ -75,7 +68,9 @@ void AGladiatorGameCharacter::MoveRight(float Value)
 
 void AGladiatorGameCharacter::Move(EAxis::Type axis, float value)
 {
-	if (!Controller || value == 0.0f)
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(canMove));
+
+	if (!canMove || !Controller || value == 0.0f )
 		return;
 
 	// find out which way is right
