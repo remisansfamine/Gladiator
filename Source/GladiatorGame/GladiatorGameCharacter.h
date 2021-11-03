@@ -19,16 +19,19 @@ class AGladiatorGameCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
-	class ULifeComponent* lifeComponent;
 public:
 	AGladiatorGameCharacter();
 
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
 protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
+	class ULifeComponent* lifeComponent;
+
+	void ActivateCamera();
+	void DeactivateCamera();
 
 	void Move(EAxis::Type axis, float value);
 	void Move(const FVector& direction, float value);
@@ -39,20 +42,11 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// End of APawn interface
-
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }	
-
-
-	UFUNCTION() void test();
-	void HurtTest();
 
 };
 
