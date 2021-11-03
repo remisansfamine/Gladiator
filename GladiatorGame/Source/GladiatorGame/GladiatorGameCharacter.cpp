@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "LifeComponent.h"
+
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
 {
@@ -30,6 +32,9 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>("FollowCamera");
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
+	lifeComponent->SetLife(5);
 }
 
 void AGladiatorGameCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
