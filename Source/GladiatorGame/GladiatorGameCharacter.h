@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "GladiatorGameCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTest);
+
+
 UCLASS(config=Game)
 class AGladiatorGameCharacter : public ACharacter
 {
@@ -27,8 +30,6 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
-	class ULifeComponent* lifeComponent;
 
 	void ActivateCamera();
 	void DeactivateCamera();
@@ -43,10 +44,15 @@ protected:
 	void MoveRight(float Value);
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
+	class ULifeComponent* lifeComponent;
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }	
 
+	UPROPERTY(BlueprintAssignable)
+	FTest OnTest;
 };
 

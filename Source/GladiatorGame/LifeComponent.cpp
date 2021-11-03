@@ -14,12 +14,15 @@ ULifeComponent::ULifeComponent()
 void ULifeComponent::Hurt(int damage) 
 { 
 	SetLife(life - damage);
-	OnHurt.ExecuteIfBound();
+	
+	if (OnHurt.IsBound())
+		OnHurt.Broadcast();
 }
 
 void ULifeComponent::Kill()
 {
-	OnKill.ExecuteIfBound();
+	if (OnKill.IsBound())
+		OnKill.Broadcast();
 }
  
 void ULifeComponent::SetLife(int value)
