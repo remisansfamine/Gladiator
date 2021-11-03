@@ -20,6 +20,6 @@ public :
 	UCapsuleComponent* capsuleComponent;
 
 private :
-	void OnHit(UPrimitiveComponent* hitComponent, AActor* otherActor, UPrimitiveComponent* otherComp,
-		FVector normalImpulse, const FHitResult& hit);
+	UFUNCTION(BlueprintCallable)
+	void OnHit();
 };

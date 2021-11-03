@@ -14,17 +14,17 @@ class GLADIATORGAME_API ULifeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraSettings, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
 	int life;
 
 public:	
 	// Sets default values for this component's properties
 	ULifeComponent();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Hurt(int damage);
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Kill();
 
 	void SetLife(int value);
