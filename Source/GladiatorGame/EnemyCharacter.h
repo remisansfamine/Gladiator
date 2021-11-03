@@ -13,5 +13,13 @@ UCLASS()
 class GLADIATORGAME_API AEnemyCharacter : public AGladiatorGameCharacter
 {
 	GENERATED_BODY()
+
+public :
+	AEnemyCharacter();
 	
+	UCapsuleComponent* capsuleComponent;
+
+private :
+	void OnHit(UPrimitiveComponent* hitComponent, AActor* otherActor, UPrimitiveComponent* otherComp,
+		FVector normalImpulse, const FHitResult& hit);
 };
