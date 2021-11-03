@@ -11,6 +11,7 @@ class AGladiatorGameCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -19,6 +20,8 @@ class AGladiatorGameCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
+	bool canMove = true;
+
 public:
 	AGladiatorGameCharacter();
 
@@ -26,7 +29,7 @@ public:
 	float BaseLookUpRate;
 
 protected:
-
+	void OnDeath();
 
 	void ActivateCamera();
 	void DeactivateCamera();
