@@ -6,9 +6,6 @@
 #include "GameFramework/Character.h"
 #include "GladiatorGameCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTest);
-
-
 UCLASS(config=Game)
 class AGladiatorGameCharacter : public ACharacter
 {
@@ -51,8 +48,5 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }	
-
-	UPROPERTY(BlueprintAssignable)
-	FTest OnTest;
 };
 
