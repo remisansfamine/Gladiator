@@ -29,6 +29,7 @@ public:
 	float BaseLookUpRate;
 
 protected:
+	UFUNCTION()
 	void OnDeath();
 
 	void ActivateCamera();

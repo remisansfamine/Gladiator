@@ -5,6 +5,7 @@
 #include "LifeComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemyCharacter::AEnemyCharacter()
 	: AGladiatorGameCharacter()
@@ -13,9 +14,19 @@ AEnemyCharacter::AEnemyCharacter()
 
 }
 
-void AEnemyCharacter::OnHit()
+void AEnemyCharacter::BeginPlay()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Arrete de me toucher man"));
+	Super::BeginPlay();
+	
+	playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 }
 
+void AEnemyCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 
+	if (!playerCharacter)
+		return;
+
+	Move(playerCharacter->GetActorLocation() - GetActorLocation(), 500.f);
+}
