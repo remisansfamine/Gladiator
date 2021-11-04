@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "LifeComponent.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
@@ -34,6 +35,12 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	hammer = CreateDefaultSubobject<USkeletalMeshComponent>("Hammer");
+	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
+
+	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
+	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
+
 	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
 	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
 
@@ -53,6 +60,38 @@ void AGladiatorGameCharacter::DeactivateCamera()
 void AGladiatorGameCharacter::OnDeath()
 {
 	canMove = false;
+}
+
+void AGladiatorGameCharacter::SetState(ECharacterState state)
+{
+	characterState = state;
+
+	if (OnStateChanged.IsBound())
+		OnStateChanged.Broadcast(state);
+}
+
+void AGladiatorGameCharacter::Attack()
+{
+	if (characterState == ECharacterState::ATTACKING)
+		return;
+
+	canMove = false;
+	SetState(ECharacterState::ATTACKING);
+}
+
+void AGladiatorGameCharacter::Defend(bool defending)
+{
+	if (characterState == ECharacterState::ATTACKING)
+		return;
+
+	canMove = true;
+	SetState(defending ? ECharacterState::DEFENDING : ECharacterState::IDLE);
+}
+
+void AGladiatorGameCharacter::Idle()
+{
+	canMove = true;
+	SetState(ECharacterState::IDLE);
 }
 
 void AGladiatorGameCharacter::MoveForward(float Value)
