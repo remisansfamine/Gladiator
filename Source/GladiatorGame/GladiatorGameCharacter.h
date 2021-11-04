@@ -24,10 +24,13 @@ private:
 	class UCameraComponent* FollowCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-	class USkeletalMeshComponent* hammer;
+	class UStaticMeshComponent* hammer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-	class USkeletalMeshComponent* shield;
+	class UStaticMeshComponent* shield;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* sphereHit;
 
 	bool canMove = true;
 
