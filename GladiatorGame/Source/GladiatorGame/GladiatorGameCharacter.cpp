@@ -52,7 +52,6 @@ void AGladiatorGameCharacter::DeactivateCamera()
 
 void AGladiatorGameCharacter::OnDeath()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
 	canMove = false;
 }
 
@@ -68,8 +67,6 @@ void AGladiatorGameCharacter::MoveRight(float Value)
 
 void AGladiatorGameCharacter::Move(EAxis::Type axis, float value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(canMove));
-
 	if (!canMove || !Controller || value == 0.0f )
 		return;
 
