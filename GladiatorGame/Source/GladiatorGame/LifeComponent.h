@@ -19,7 +19,7 @@ class GLADIATORGAME_API ULifeComponent : public UActorComponent
 
 public:	
 	// Sets default values for this component's properties
-	ULifeComponent();
+	ULifeComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable)
 	void Hurt(int damage);

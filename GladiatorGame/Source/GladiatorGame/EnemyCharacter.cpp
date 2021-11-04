@@ -10,14 +10,13 @@
 AEnemyCharacter::AEnemyCharacter()
 	: AGladiatorGameCharacter()
 {
-	lifeComponent->SetLife(3);
-
+	lifeComponent->SetLife(3);	
 }
 
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 }
 
