@@ -8,6 +8,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 AAIC_Enemy::AAIC_Enemy(const FObjectInitializer& ObjectInitializer) : AAIController(ObjectInitializer)
 {
@@ -28,23 +29,18 @@ void AAIC_Enemy::BeginPlay()
 	Super::BeginPlay();
 	RunBehaviorTree(btree);
 	behaviorTreeComponent->StartTree(*btree);
+	
+	blackboard->SetValueAsObject("PlayerActor", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AAIC_Enemy::OnPossess(APawn* const pawn)
 {
 	Super::OnPossess(pawn);
-	if (blackboard)
-	{
-
-	}
 }
 
 void AAIC_Enemy::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
-
-	AEnemyCharacter* character = Cast<AEnemyCharacter>(GetPawn());
-
 	//blackboard->SetValueAsString("Debug", TEXT("Life = ") + FString::FromInt(character->lifeComponent->GetLife()));
 }
 
