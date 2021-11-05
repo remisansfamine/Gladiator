@@ -8,6 +8,7 @@ APlayerCharacter::APlayerCharacter()
 	: AGladiatorGameCharacter()
 {
 	lifeComponent->SetLife(5);
+	lifeComponent->invicibleCooldown = 1.f;
 	ActivateCamera();
 }
 

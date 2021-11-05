@@ -38,6 +38,7 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	hammer = CreateDefaultSubobject<UStaticMeshComponent>("Hammer");
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
 
+
 	shield = CreateDefaultSubobject<UStaticMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
@@ -45,6 +46,41 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
 
 	canMove = true;
+}
+
+void AGladiatorGameCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (hammer)
+	{
+		hammer->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		hammer->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
+	}
+}
+
+void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!OtherActor || OtherActor == this || !OtherComp)
+		return;
+
+	AGladiatorGameCharacter* other = Cast<AGladiatorGameCharacter>(OtherActor);
+
+	if (!other)
+		return;
+
+	ULifeComponent* otherLifeComp = other->lifeComponent;
+
+	if (!other->lifeComponent)
+		return;
+
+	otherLifeComp->Hurt(1);
+}
+
+void AGladiatorGameCharacter::SetAttackState(bool attacking)
+{
+
+	hammer->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }
 
 void AGladiatorGameCharacter::ActivateCamera() 
@@ -60,6 +96,8 @@ void AGladiatorGameCharacter::DeactivateCamera()
 void AGladiatorGameCharacter::OnDeath()
 {
 	canMove = false;
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGladiatorGameCharacter::SetState(ECharacterState state)

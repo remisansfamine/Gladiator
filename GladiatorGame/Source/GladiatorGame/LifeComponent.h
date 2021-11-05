@@ -17,7 +17,18 @@ class GLADIATORGAME_API ULifeComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
 	int life;
 
+	FTimerHandle invicibleTimer;
+
+
+	bool isInvicible;
+
+	UFUNCTION()
+	void ResetInvicibility();
+
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
+	float invicibleCooldown;
+
 	// Sets default values for this component's properties
 	ULifeComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -37,6 +48,4 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
 	FKillDelegate OnKill;
-
-	
 };
