@@ -37,7 +37,7 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 
 	hammer = CreateDefaultSubobject<UStaticMeshComponent>("Hammer");
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
-
+	hammer->SetGenerateOverlapEvents(true);
 
 	shield = CreateDefaultSubobject<UStaticMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
@@ -61,7 +61,9 @@ void AGladiatorGameCharacter::BeginPlay()
 
 void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == this || !OtherComp)
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap"));
+
+	if (!OverlappedComp || !OtherActor || OtherActor == this)
 		return;
 
 	AGladiatorGameCharacter* other = Cast<AGladiatorGameCharacter>(OtherActor);
@@ -79,8 +81,10 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
 {
+	if (attacking)
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attack set true"));
 
-	hammer->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	hammer->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }
 
 void AGladiatorGameCharacter::ActivateCamera() 
@@ -98,6 +102,8 @@ void AGladiatorGameCharacter::OnDeath()
 	canMove = false;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
 }
 
 void AGladiatorGameCharacter::SetState(ECharacterState state)
