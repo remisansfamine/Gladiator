@@ -29,9 +29,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* shield;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* sphereHit;
-
 	bool canMove = true;
 
 public:
@@ -46,6 +43,12 @@ protected:
 
 	void ActivateCamera();
 	void DeactivateCamera();
+
+	UFUNCTION(BlueprintCallable)
+	void SetAttackState(bool attacking);
+
+	UFUNCTION()
+	void OverlapCallback(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void Move(EAxis::Type axis, float value);
 	void Move(const FVector& direction, float value);
@@ -70,6 +73,7 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	virtual void BeginPlay() override;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))

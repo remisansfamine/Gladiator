@@ -7,17 +7,33 @@
 ULifeComponent::ULifeComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+
 }
 
 void ULifeComponent::Hurt(int damage) 
 { 
+	if (isInvicible)
+		return;
+
 	SetLife(life - damage);
-	
+
 	if (OnHurt.IsBound())
 		OnHurt.Broadcast();
+
+	if (invicibleCooldown <= 0.f)
+		return;
+
+	isInvicible = true;
+	GetWorld()->GetTimerManager().SetTimer(invicibleTimer, this, &ULifeComponent::ResetInvicibility, invicibleCooldown, false);
+
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Aie mdr"));
+}
+
+void ULifeComponent::ResetInvicibility()
+{
+	isInvicible = false;
+	GetWorld()->GetTimerManager().ClearTimer(invicibleTimer);
 }
 
 void ULifeComponent::Kill()
