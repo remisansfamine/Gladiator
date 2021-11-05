@@ -29,7 +29,6 @@ public:
 
 	void SetLife(int value);
 	int GetLife() { return life; }
-
 public:	
 
 	UPROPERTY(BlueprintAssignable, Category="Components|Life")
