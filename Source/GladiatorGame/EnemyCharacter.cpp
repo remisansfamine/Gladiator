@@ -27,5 +27,5 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	if (!playerCharacter)
 		return;
 
-	Move(playerCharacter->GetActorLocation() - GetActorLocation(), 500.f);
+	//Move(playerCharacter->GetActorLocation() - GetActorLocation(), 500.f);
 }
