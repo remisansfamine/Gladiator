@@ -9,6 +9,6 @@ public class GladiatorGame : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", 
-			"HeadMountedDisplay", "AIModule", "GameplayTasks" });
+			"HeadMountedDisplay", "AIModule", "GameplayTasks", "NavigationSystem" });
 	}
 }

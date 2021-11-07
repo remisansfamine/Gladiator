@@ -17,24 +17,25 @@ bool UBTD_CheckMove::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerCom
 {
 	const AAIController* cont = OwnerComp.GetAIOwner();
 
-	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(cont->GetPawn());
-	if (!enemyCharacter)
+	APawn* enemyPawn = cont->GetPawn();
+	if (!enemyPawn)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("!Enemy"));
-		return false;
+		UE_LOG(LogTemp, Warning, TEXT("enemyPawn Failed"));
+		return EBTNodeResult::Failed;
 	}
+
+	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
+	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
 
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
 	if (!playerCharacter)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("!Player"));
-		return false;
+		EBTNodeResult::Failed;
 	}
 
-	//USE Replace MoveTo by task -> MoveToLocation !!!!
+	float distance = FVector::Dist(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
 
-	UE_LOG(LogTemp, Warning, TEXT("Distance between player and enemy = %f"),
-		FVector::Distance(playerCharacter->GetActorLocation(), enemyCharacter->GetActorLocation()));
 
-	return FVector::Distance(playerCharacter->GetActorLocation(), enemyCharacter->GetActorLocation()) > 500;
+
+	return true;
 }

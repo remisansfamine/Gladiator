@@ -23,6 +23,13 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+public :
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	float safePlayerDistanceMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	float safePlayerDistanceMax;
+
 private :
 
 	class APlayerCharacter* playerCharacter;
