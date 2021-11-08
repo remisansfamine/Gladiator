@@ -9,8 +9,10 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Navigation/CrowdFollowingComponent.h"
 
-AAIC_Enemy::AAIC_Enemy(const FObjectInitializer& ObjectInitializer) : AAIController(ObjectInitializer)
+AAIC_Enemy::AAIC_Enemy(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	static ConstructorHelpers::FObjectFinder<UBehaviorTree> obj(TEXT("/Game/Blueprints/Enemy/AI/BT_Enemy"));
 	if (obj.Succeeded())

@@ -10,7 +10,7 @@
 
 UBTD_CheckMove::UBTD_CheckMove(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	NodeName = TEXT("Check Move");
+	NodeName = TEXT("Check Move To Player");
 }
 
 bool UBTD_CheckMove::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
@@ -18,24 +18,23 @@ bool UBTD_CheckMove::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerCom
 	const AAIController* cont = OwnerComp.GetAIOwner();
 
 	APawn* enemyPawn = cont->GetPawn();
-	if (!enemyPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("enemyPawn Failed"));
-		return EBTNodeResult::Failed;
-	}
-
 	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
-	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
-
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
-	if (!playerCharacter)
-	{
-		EBTNodeResult::Failed;
-	}
 
 	float distance = FVector::Dist(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
+	if (distance <= enemyCharacter->safePlayerDistanceMin)
+	{
+		AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
+		enemyController->StopMovement();
+		return false;
+	}
 
-
+	float playerSpeed = FVector::VectorPlaneProject(playerCharacter->GetVelocity(), FVector(0, 0, 1)).Size();
+	if (playerSpeed == 0)
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 1);
+		return false;
+	}
 
 	return true;
 }
