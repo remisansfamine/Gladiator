@@ -17,6 +17,9 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PawnIgnoreCam"));
+
+	GetMesh()->SetCollisionProfileName(TEXT("CharacterMeshIgnoreCam"));
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
@@ -36,15 +39,15 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	hammer = CreateDefaultSubobject<UStaticMeshComponent>("Hammer");
+	hammer = CreateDefaultSubobject<USkeletalMeshComponent>("Hammer");
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
 	hammer->SetGenerateOverlapEvents(true);
 
 	weaponCollider = CreateDefaultSubobject<USphereComponent>("Sphere collider");
-	weaponCollider->SetupAttachment(hammer, TEXT("Socket"));
+	weaponCollider->SetupAttachment(hammer, TEXT("ColliderSocket"));
 	weaponCollider->SetGenerateOverlapEvents(true);
 
-	shield = CreateDefaultSubobject<UStaticMeshComponent>("Shield");
+	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
 	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
@@ -66,8 +69,6 @@ void AGladiatorGameCharacter::BeginPlay()
 
 void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap"));
-
 	if (!OverlappedComp || !OtherActor || OtherActor == this)
 		return;
 
@@ -82,15 +83,10 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 		return;
 
 	otherLifeComp->Hurt(1);
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("hurt"));
 }
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
 {
-	if (attacking)
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attack set true"));
-
 	weaponCollider->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }
 
@@ -106,11 +102,22 @@ void AGladiatorGameCharacter::DeactivateCamera()
 
 void AGladiatorGameCharacter::OnDeath()
 {
+	SetAttackState(false);
+	SetState(ECharacterState::IDLE);
+
 	canMove = false;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
 	GetMesh()->SetSimulatePhysics(true);
+
+	hammer->DetachFromParent(true);
+	hammer->SetSimulatePhysics(true);
+	hammer->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
+
+	hammer->DetachFromParent(true);
+	shield->SetSimulatePhysics(true);
+	shield->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
 }
 
 void AGladiatorGameCharacter::SetState(ECharacterState state)
