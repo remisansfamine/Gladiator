@@ -25,9 +25,6 @@ void ULifeComponent::Hurt(int damage)
 
 	isInvicible = true;
 	GetWorld()->GetTimerManager().SetTimer(invicibleTimer, this, &ULifeComponent::ResetInvicibility, invicibleCooldown, false);
-
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Aie mdr"));
 }
 
 void ULifeComponent::ResetInvicibility()
