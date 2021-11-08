@@ -18,10 +18,9 @@ public :
 	UBTT_MoveToPlayer(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	FVector ProjectPointOnNavigableLocation(FVector desiredLocation, APawn* enemyPawn);
+	FVector GetPointRadiusOnNavigableLocation(FVector originLocation, float radius, APawn* enemyPawn);
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-private :
-	FVector currentTarget;
-	bool targetAlreadySet = false;
 };
+
+FVector GetRandomPointInSemiTorus(float radiusMin, float radiusMax, FVector unitAxisB);
