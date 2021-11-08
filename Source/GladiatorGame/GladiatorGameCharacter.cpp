@@ -4,6 +4,7 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -39,6 +40,10 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
 	hammer->SetGenerateOverlapEvents(true);
 
+	weaponCollider = CreateDefaultSubobject<USphereComponent>("Sphere collider");
+	weaponCollider->SetupAttachment(hammer, TEXT("Socket"));
+	weaponCollider->SetGenerateOverlapEvents(true);
+
 	shield = CreateDefaultSubobject<UStaticMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
@@ -52,10 +57,10 @@ void AGladiatorGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (hammer)
+	if (weaponCollider)
 	{
-		hammer->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		hammer->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
+		weaponCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
 	}
 }
 
@@ -77,6 +82,8 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 		return;
 
 	otherLifeComp->Hurt(1);
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("hurt"));
 }
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
@@ -84,7 +91,7 @@ void AGladiatorGameCharacter::SetAttackState(bool attacking)
 	if (attacking)
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Attack set true"));
 
-	hammer->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+	weaponCollider->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }
 
 void AGladiatorGameCharacter::ActivateCamera() 
