@@ -27,6 +27,9 @@ private:
 	class UStaticMeshComponent* hammer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* weaponCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* shield;
 
 	bool canMove = true;
@@ -87,4 +90,3 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Character|State")
 	FCharacterState OnStateChanged;
 };
-
