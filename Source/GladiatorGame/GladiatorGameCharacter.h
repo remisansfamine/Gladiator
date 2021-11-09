@@ -42,6 +42,12 @@ public:
 
 protected:
 	UFUNCTION()
+	void OnInvicibilityStop();
+
+	UFUNCTION()
+	void OnHurt();
+
+	UFUNCTION()
 	void OnDeath();
 
 	void ActivateCamera();
