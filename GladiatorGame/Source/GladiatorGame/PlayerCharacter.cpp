@@ -4,9 +4,11 @@
 #include "PlayerCharacter.h"
 #include "EnemyCharacter.h"
 #include "LifeComponent.h"
-#include "Camera\CameraComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 APlayerCharacter::APlayerCharacter() 
 	: AGladiatorGameCharacter()
@@ -24,7 +26,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("LockOn", IE_Pressed, this, &APlayerCharacter::LockOn);
-	PlayerInputComponent->BindAction("LockOn", IE_Released, this, &APlayerCharacter::LockOn);
+	PlayerInputComponent->BindAction("LockOn", IE_Released, this, &APlayerCharacter::LockOff);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
@@ -48,27 +50,24 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 void APlayerCharacter::LookAtTarget()
 {
-	FRotator ForwardRotation = (target->GetActorLocation() - GetActorLocation()).Rotation();
-	SetActorRotation(ForwardRotation);
+	FRotator lookAtRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation());
+	lookAtRot = UKismetMathLibrary::RInterpTo(GetActorRotation(), lookAtRot, GetWorld()->GetDeltaSeconds(), lockOnSpeed);
 
-	FRotator BaseLock = GetController()->GetControlRotation();
-	//GetController()->Rotation
+	SetActorRotation(lookAtRot);
 
-	FVector Forward = target->GetActorLocation() - GetActorLocation();
-
-	FQuat lookAtQuat = FRotationMatrix::MakeFromXZ(Forward, FVector::UpVector).ToQuat();
-	GetFollowCamera()->SetWorldRotation(lookAtQuat, true);
+	FRotator controllerLookAt = Controller->GetControlRotation();
+	controllerLookAt.Yaw = lookAtRot.Yaw;
+	Controller->SetControlRotation(controllerLookAt);
 }
 
 void APlayerCharacter::LockOn()
 {
-	isLockingOn = !isLockingOn;
-
-	if (!isLockingOn)
-	{
-		target = nullptr;
-		return;
-	}
-
+	CameraBoom->bUsePawnControlRotation = false; // Rotate the arm based on the controller
 	target = Cast<AEnemyCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyCharacter::StaticClass()));
+}
+
+void APlayerCharacter::LockOff()
+{
+	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	target = nullptr;
 }

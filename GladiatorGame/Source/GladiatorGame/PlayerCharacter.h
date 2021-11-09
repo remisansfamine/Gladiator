@@ -14,17 +14,21 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 {
 	GENERATED_BODY()
 
-	bool isLockingOn;
-
 	AGladiatorGameCharacter* target;
 
 	void LookAtTarget();
+
+	UPROPERTY(EditAnywhere)
+	float lockOnSpeed = 2.5f;
 
 public :
 	APlayerCharacter();
 
 	UFUNCTION()
 	void LockOn();
+
+	UFUNCTION()
+	void LockOff();
 
 	void Tick(float DeltaTime) override;
 
