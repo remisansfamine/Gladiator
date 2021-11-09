@@ -11,7 +11,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "LifeComponent.h"
 #include "UObject/ConstructorHelpers.h"
-
+#include "Kismet/GameplayStatics.h"
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
 {
@@ -205,4 +205,43 @@ void AGladiatorGameCharacter::Move(const FVector& direction, float value)
 		return;
 
 	AddMovementInput(direction, value);
+}
+
+AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDistance, float maxDistance)
+{
+	float minDistSquared = minDistance * minDistance;
+	float maxDistSquared = maxDistance * maxDistance;
+
+	FVector currentLocation = GetActorLocation();
+
+	TArray<AActor*> gladiators;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGladiatorGameCharacter::StaticClass(), gladiators);
+
+	TArray<AActor*> validGladiators;
+	for (AActor* gladiator : gladiators)
+	{
+		if (gladiator == this)
+			continue;
+		
+		float distSquared = GetSquaredDistanceTo(gladiator);
+
+		if (GetSquaredDistanceTo(gladiator) < minDistSquared || GetSquaredDistanceTo(gladiator) > maxDistSquared)
+			continue;
+
+		validGladiators.Add(gladiator);
+	}
+
+	if (validGladiators.Num() == 0)
+		return nullptr;
+
+	validGladiators.Sort([this](const AActor& A, const AActor& B)
+	{
+		float distA = GetDistanceTo(&A);
+		float distB = GetDistanceTo(&B);
+		return distA < distB;
+	});
+
+	AActor* validActor = validGladiators[0];
+
+	return Cast<AGladiatorGameCharacter>(validActor);
 }

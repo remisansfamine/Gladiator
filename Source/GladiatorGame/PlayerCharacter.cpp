@@ -2,11 +2,9 @@
 
 
 #include "PlayerCharacter.h"
-#include "EnemyCharacter.h"
 #include "LifeComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
@@ -50,7 +48,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 void APlayerCharacter::LookAtTarget()
 {
-	FRotator lookAtRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation());
+	FVector differenceVector = target->GetActorLocation() - GetActorLocation();
+
+	FRotator lookAtRot = differenceVector.Rotation();
 	lookAtRot = UKismetMathLibrary::RInterpTo(GetActorRotation(), lookAtRot, GetWorld()->GetDeltaSeconds(), lockOnSpeed);
 
 	SetActorRotation(lookAtRot);
@@ -62,8 +62,10 @@ void APlayerCharacter::LookAtTarget()
 
 void APlayerCharacter::LockOn()
 {
-	CameraBoom->bUsePawnControlRotation = false; // Rotate the arm based on the controller
-	target = Cast<AEnemyCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyCharacter::StaticClass()));
+	target = GetOtherGladiator(minLockOnDistance, maxLockOnDistance);
+
+	if (target)
+		CameraBoom->bUsePawnControlRotation = false; // Rotate the arm based on the controller
 }
 
 void APlayerCharacter::LockOff()

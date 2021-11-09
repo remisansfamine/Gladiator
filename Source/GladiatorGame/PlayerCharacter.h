@@ -21,6 +21,12 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 	UPROPERTY(EditAnywhere)
 	float lockOnSpeed = 2.5f;
 
+	UPROPERTY(EditAnywhere)
+	float minLockOnDistance = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float maxLockOnDistance = 500.f;
+
 public :
 	APlayerCharacter();
 
