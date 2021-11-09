@@ -70,6 +70,7 @@ void AGladiatorGameCharacter::BeginPlay()
 	}
 }
 
+
 void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OverlappedComp || !OtherActor || OtherActor == this)
@@ -108,13 +109,22 @@ void AGladiatorGameCharacter::OnInvicibilityStop()
 	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(0.f, 0.f, 0.f));
 }
 
+void AGladiatorGameCharacter::setCameraShake(const TSubclassOf<UCameraShakeBase>& shakeClass, float scale)
+{
+	if (shakeClass)
+		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(shakeClass, scale);
+}
+
 void AGladiatorGameCharacter::OnHurt()
 {
 	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(1.f, 0.f, 0.f));
+	setCameraShake(camShake, 0.5f);
 }
 
 void AGladiatorGameCharacter::OnDeath()
 {
+	setCameraShake(camShake, 1.25f);
+
 	SetAttackState(false);
 	SetState(ECharacterState::IDLE);
 

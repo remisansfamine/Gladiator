@@ -68,13 +68,13 @@ protected:
 	void SetState(ECharacterState state);
 
 	UFUNCTION(BlueprintCallable)
-	void Attack();
+	virtual void Attack();
 
 	UFUNCTION(BlueprintCallable)
-	void Defend(bool defending);
+	virtual void Defend(bool defending);
 
 	UFUNCTION(BlueprintCallable)
-	void Idle();
+	virtual void Idle();
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -83,6 +83,11 @@ protected:
 	void MoveRight(float Value);
 
 	virtual void BeginPlay() override;
+
+	void setCameraShake(const TSubclassOf<UCameraShakeBase>& shakeClass, float scale);
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMatineeCameraShake> camShake;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
