@@ -41,7 +41,6 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 
 	hammer = CreateDefaultSubobject<USkeletalMeshComponent>("Hammer");
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
-	hammer->SetGenerateOverlapEvents(true);
 
 	weaponCollider = CreateDefaultSubobject<USphereComponent>("Sphere collider");
 	weaponCollider->SetupAttachment(hammer, TEXT("ColliderSocket"));
@@ -115,7 +114,7 @@ void AGladiatorGameCharacter::OnDeath()
 	hammer->SetSimulatePhysics(true);
 	hammer->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
 
-	hammer->DetachFromParent(true);
+	shield->DetachFromParent(true);
 	shield->SetSimulatePhysics(true);
 	shield->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
 }
