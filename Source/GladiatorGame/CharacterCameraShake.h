@@ -13,5 +13,6 @@ UCLASS()
 class GLADIATORGAME_API UCharacterCameraShake : public UMatineeCameraShake
 {
 	GENERATED_BODY()
-	
+
+	UCharacterCameraShake();
 };
