@@ -31,6 +31,9 @@ void ULifeComponent::ResetInvicibility()
 {
 	isInvicible = false;
 	GetWorld()->GetTimerManager().ClearTimer(invicibleTimer);
+
+	if (OnInvicibilityStop.IsBound())
+		OnInvicibilityStop.Broadcast();
 }
 
 void ULifeComponent::Kill()

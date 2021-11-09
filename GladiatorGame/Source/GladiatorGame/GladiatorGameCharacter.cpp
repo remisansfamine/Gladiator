@@ -20,6 +20,7 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PawnIgnoreCam"));
 
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMeshIgnoreCam"));
+	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(0.f, 0.f, 0.f));
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
@@ -50,9 +51,12 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
 	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
+	lifeComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
 	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
+	lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
 
 	canMove = true;
+
 }
 
 void AGladiatorGameCharacter::BeginPlay()
@@ -97,6 +101,16 @@ void AGladiatorGameCharacter::ActivateCamera()
 void AGladiatorGameCharacter::DeactivateCamera() 
 { 
 	CameraBoom->Deactivate(); 
+}
+
+void AGladiatorGameCharacter::OnInvicibilityStop()
+{
+	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(0.f, 0.f, 0.f));
+}
+
+void AGladiatorGameCharacter::OnHurt()
+{
+	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(1.f, 0.f, 0.f));
 }
 
 void AGladiatorGameCharacter::OnDeath()

@@ -6,8 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "LifeComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHurtDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FKillDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLifeDelegate);
 
 UCLASS( ClassGroup=(Custom), Blueprintable, meta=(BlueprintSpawnableComponent) )
 class GLADIATORGAME_API ULifeComponent : public UActorComponent
@@ -42,10 +41,12 @@ public:
 	int GetLife() { return life; }
 
 public:	
+	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
+	FLifeDelegate OnInvicibilityStop;
 
 	UPROPERTY(BlueprintAssignable, Category="Components|Life")
-	FHurtDelegate OnHurt;
+	FLifeDelegate OnHurt;
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
-	FKillDelegate OnKill;
+	FLifeDelegate OnKill;
 };
