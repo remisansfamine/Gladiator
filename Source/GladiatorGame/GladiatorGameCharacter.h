@@ -14,7 +14,7 @@ class AGladiatorGameCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -25,6 +25,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* hammer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* weaponCollider;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* shield;
@@ -39,10 +42,22 @@ public:
 
 protected:
 	UFUNCTION()
+	void OnInvicibilityStop();
+
+	UFUNCTION()
+	void OnHurt();
+
+	UFUNCTION()
 	void OnDeath();
 
 	void ActivateCamera();
 	void DeactivateCamera();
+
+	UFUNCTION(BlueprintCallable)
+	void SetAttackState(bool attacking);
+
+	UFUNCTION()
+	void OverlapCallback(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void Move(EAxis::Type axis, float value);
 	void Move(const FVector& direction, float value);
@@ -53,13 +68,13 @@ protected:
 	void SetState(ECharacterState state);
 
 	UFUNCTION(BlueprintCallable)
-	void Attack();
+	virtual void Attack();
 
 	UFUNCTION(BlueprintCallable)
-	void Defend(bool defending);
+	virtual void Defend(bool defending);
 
 	UFUNCTION(BlueprintCallable)
-	void Idle();
+	virtual void Idle();
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -67,6 +82,14 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	virtual void BeginPlay() override;
+
+	void setCameraShake(const TSubclassOf<UCameraShakeBase>& shakeClass, float scale);
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMatineeCameraShake> camShake;
+
+	AGladiatorGameCharacter* GetOtherGladiator(float minDistance, float maxDistance);
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
@@ -80,4 +103,3 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Character|State")
 	FCharacterState OnStateChanged;
 };
-

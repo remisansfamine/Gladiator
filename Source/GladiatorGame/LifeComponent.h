@@ -6,8 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "LifeComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHurtDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FKillDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLifeDelegate);
 
 UCLASS( ClassGroup=(Custom), Blueprintable, meta=(BlueprintSpawnableComponent) )
 class GLADIATORGAME_API ULifeComponent : public UActorComponent
@@ -17,7 +16,18 @@ class GLADIATORGAME_API ULifeComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
 	int life;
 
+	FTimerHandle invicibleTimer;
+
+
+	bool isInvicible;
+
+	UFUNCTION()
+	void ResetInvicibility();
+
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
+	float invicibleCooldown;
+
 	// Sets default values for this component's properties
 	ULifeComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -30,12 +40,12 @@ public:
 	void SetLife(int value);
 	int GetLife() { return life; }
 public:	
+	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
+	FLifeDelegate OnInvicibilityStop;
 
 	UPROPERTY(BlueprintAssignable, Category="Components|Life")
-	FHurtDelegate OnHurt;
+	FLifeDelegate OnHurt;
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
-	FKillDelegate OnKill;
-
-	
+	FLifeDelegate OnKill;
 };
