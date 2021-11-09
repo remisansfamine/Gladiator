@@ -13,9 +13,20 @@ UCLASS()
 class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 {
 	GENERATED_BODY()
-	
+
+	bool isLockingOn;
+
+	AGladiatorGameCharacter* target;
+
+	void LookAtTarget();
+
 public :
 	APlayerCharacter();
+
+	UFUNCTION()
+	void LockOn();
+
+	void Tick(float DeltaTime) override;
 
 protected:
 	// APawn interface
