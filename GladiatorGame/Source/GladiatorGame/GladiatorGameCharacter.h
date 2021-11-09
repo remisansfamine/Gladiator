@@ -89,6 +89,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMatineeCameraShake> camShake;
 
+	AGladiatorGameCharacter* GetOtherGladiator(float minDistance, float maxDistance);
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
 	class ULifeComponent* lifeComponent;
