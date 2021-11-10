@@ -7,6 +7,10 @@
 #include "EnemyCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Controller.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 UBTT_RotateToPlayer::UBTT_RotateToPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -17,24 +21,25 @@ EBTNodeResult::Type UBTT_RotateToPlayer::ExecuteTask(UBehaviorTreeComponent& Own
 {
 	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
 
-	const AAIController* cont = OwnerComp.GetAIOwner();
+	AAIController* cont = OwnerComp.GetAIOwner();
 	AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(cont->GetPawn());
 	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
-	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
+	APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
 
 
-	if (enumId != 4 && enumId != 2)
+	if (enumId != 4 && enumId != 3)
 	{
-		enemyController->bSetControlRotationFromPawnOrientation = 1;
+		enemyController->ClearFocus(EAIFocusPriority::Move);
+		enemyCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 		return EBTNodeResult::Succeeded;
 	}
 
-	enemyController->bSetControlRotationFromPawnOrientation = 0;
+	enemyCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+	FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
+	FRotator rotator = UKismetMathLibrary::RInterpTo(enemyCharacter->GetActorRotation(), lookAt, 0.01f, enemyCharacter->rotateSpeed);
 
-	FQuat quaternion = FQuat::FindBetweenVectors(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
-
-	FRotator rotator = FRotator::MakeFromEuler(FVector(0, 0, quaternion.Z));
-	enemyCharacter->SetActorRotation(quaternion, ETeleportType::None);
+	enemyCharacter->SetActorRotation(rotator.Quaternion());
+	enemyController->SetFocalPoint(playerCharacter->GetActorLocation(), EAIFocusPriority::Move);
 
 	return EBTNodeResult::Succeeded;
 }
