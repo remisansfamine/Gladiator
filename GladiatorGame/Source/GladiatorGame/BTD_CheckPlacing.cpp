@@ -44,26 +44,16 @@ bool UBTD_CheckPlacing::CalculateRawConditionValue(UBehaviorTreeComponent& Owner
 		
 		if (distance < enemyCharacter->safePlayerDistanceMax && distance > enemyCharacter->safePlayerDistanceMin)
 		{
-			if (checkIfPawnIsInSphere(80, enemyCharacter->GetActorLocation(), desiredTarget, enemyPawn))
+			if (checkIfPawnIsInSphere(enemyCharacter->wantedRoomRadius, desiredTarget, enemyPawn))
 			{
 				OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 2);
 				return true;
 			}
 		
-			FHitResult hit;
-			if (enemyPawn->GetWorld()->LineTraceSingleByChannel(hit, desiredTarget, playerCharacter->GetActorLocation(),
-				ECollisionChannel::ECC_Pawn))
+			if (checkIfPawnEnemyIsFront(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation(), enemyPawn))
 			{
-				if (AEnemyCharacter* pawnCast = Cast<AEnemyCharacter>(hit.Actor))
-				{
-					if (pawnCast != enemyPawn)
-					{
-						AAIController* enemyController = Cast<AAIController>(pawnCast->GetController());
-						if (enemyController->GetBlackboardComponent()->GetValueAsEnum("MovingState") == 4)
-							return true;
-					}
-		
-				}
+				OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 2);
+				return true;
 			}
 		
 		
@@ -79,7 +69,7 @@ bool UBTD_CheckPlacing::CalculateRawConditionValue(UBehaviorTreeComponent& Owner
 	{
 		FVector currentTarget = OwnerComp.GetBlackboardComponent()->GetValueAsVector("currentTarget");
 
-		if (checkIfPawnIsInSphere(80, enemyCharacter->GetActorLocation(), currentTarget, enemyPawn))
+		if (checkIfPawnIsInSphere(enemyCharacter->wantedRoomRadius, currentTarget, enemyPawn))
 		{
 			OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 2);
 			return true;
@@ -98,47 +88,70 @@ bool UBTD_CheckPlacing::CalculateRawConditionValue(UBehaviorTreeComponent& Owner
 	{
 		FVector currentTarget = OwnerComp.GetBlackboardComponent()->GetValueAsVector("currentTarget");
 		
-		FHitResult hit;
-		if (enemyPawn->GetWorld()->LineTraceSingleByChannel(hit, currentTarget, playerCharacter->GetActorLocation(), ECollisionChannel::ECC_Pawn))
+		if (checkIfPawnEnemyIsFront(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation(), enemyPawn))
 		{
-			if (AEnemyCharacter* pawnCast = Cast<AEnemyCharacter>(hit.Actor))
-			{
-				if (pawnCast != enemyPawn)
-				{ 
-					AAIController* enemyController = Cast<AAIController>(pawnCast->GetController());
-					if (enemyController->GetBlackboardComponent()->GetValueAsEnum("MovingState") == 4)
-						return true;
-				}
-				
-			}
+			OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 2);
+			return true;
 		}
-		
+				
 		return false;
 	}
 
 	return true;
 }
 
-bool checkIfPawnIsInSphere(float radius, const FVector& start, const FVector& end, APawn* ownPawn)
+bool checkIfPawnIsInSphere(float radius, const FVector& center, APawn* ownPawn)
 {
-	TArray<FHitResult> hits;
-	if (ownPawn->GetWorld()->SweepMultiByChannel(hits, start,
-		end, FQuat::Identity, ECollisionChannel::ECC_Pawn,
-		FCollisionShape::MakeSphere(radius)))
-	{
-		//DrawDebugSphere(ownPawn->GetWorld(), end, radius, 24, FColor::Green, false, 5.f);
+	TArray<FOverlapResult> overlaps;
 
-		for (FHitResult hit : hits)
+	if (ownPawn->GetWorld()->OverlapMultiByObjectType(overlaps, center, FQuat::Identity, 
+		FCollisionObjectQueryParams::AllObjects, FCollisionShape::MakeSphere(radius)))
+	{
+		DrawDebugSphere(ownPawn->GetWorld(), center, radius, 6, FColor::Green, false, 5.f);
+
+		for (FOverlapResult overlap : overlaps)
 		{
-			if (APawn* pawnCast = Cast<APawn>(hit.Actor))
+			if (APawn* pawnCast = Cast<APawn>(overlap.Actor))
 			{
 				if (pawnCast != ownPawn)
 				{
-					return true;
+					if (AEnemyCharacter* enemyCast = Cast<AEnemyCharacter>(pawnCast))
+					{
+						AAIController* enemyController = Cast<AAIController>(enemyCast->GetController());
+						if (enemyController->GetBlackboardComponent()->GetValueAsEnum("MovingState") == 4)
+							return true;
+					}
 				}
 			}
 		}
 	}
+	return false;
+}
+
+bool checkIfPawnEnemyIsFront(const FVector& start, const FVector& end, const APawn* ownPawn)
+{
+	TArray<FHitResult> hits;
+	if (ownPawn->GetWorld()->LineTraceMultiByObjectType(hits, start, end, FCollisionObjectQueryParams::AllObjects))
+	{
+		for (FHitResult hit : hits)
+		{
+			if (APawn* pawnCast = Cast<APawn>(hit.Actor))
+			{
+				if (ownPawn != pawnCast)
+				{
+					if (AEnemyCharacter* enemyCast = Cast<AEnemyCharacter>(hit.Actor))
+					{
+						AAIController* enemyController = Cast<AAIController>(enemyCast->GetController());
+						if (enemyController->GetBlackboardComponent()->GetValueAsEnum("MovingState") == 4)
+							return true;
+					}
+				}
+			}
+		}
+	}
+
+	DrawDebugLine(ownPawn->GetWorld(), start, end, FColor::Green, false, 0.1f);
+
 	return false;
 }
 
