@@ -30,6 +30,9 @@ public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
 	float safePlayerDistanceMax;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	float rotateSpeed;
+
 private :
 
 	class APlayerCharacter* playerCharacter;
