@@ -33,6 +33,9 @@ public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
 	float rotateSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	float wantedRoomRadius;
+
 private :
 
 	class APlayerCharacter* playerCharacter;

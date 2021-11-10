@@ -88,10 +88,13 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 	playerEnemyDir.Normalize();
 
 	bool result = false;
+	int iteration = 0;
 	FVector projectedLocation;
 
 	while (!result)
 	{
+		iteration++;
+
 		FVector randomLocation = GetRandomPointInSemiTorus(enemyCharacter->safePlayerDistanceMin,
 			enemyCharacter->safePlayerDistanceMax, playerEnemyDir);
 
@@ -101,21 +104,16 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 		if (dist < enemyCharacter->safePlayerDistanceMin || dist > enemyCharacter->safePlayerDistanceMax)
 			continue;
 
-		FHitResult hit;
-		if (enemyPawn->GetWorld()->LineTraceSingleByChannel(hit, projectedLocation, playerLocation, ECollisionChannel::ECC_Pawn))
-		{
-			if (APlayerCharacter* pawnCast = Cast<APlayerCharacter>(hit.Actor))
-				result = true;
-			else
-				continue;
-		}
+		if (checkIfPawnEnemyIsFront(projectedLocation, playerLocation, enemyPawn))
+			continue;
+		
+		if (checkIfPawnIsInSphere(enemyCharacter->wantedRoomRadius, projectedLocation, enemyPawn))
+			continue;
 
-		if (checkIfPawnIsInSphere(80, enemyCharacter->GetActorLocation(), projectedLocation, enemyPawn))
-			result = true;
-
+		result = true;
 	}
 
-	//DrawDebugSphere(enemyPawn->GetWorld(), projectedLocation, 10.f, 24, FColor::Red, false, 10.f);
+	DrawDebugSphere(enemyPawn->GetWorld(), projectedLocation, 10.f, 24, FColor::Red, false, 10.f);
 
 	enemyController->MoveToLocation(projectedLocation);
 
