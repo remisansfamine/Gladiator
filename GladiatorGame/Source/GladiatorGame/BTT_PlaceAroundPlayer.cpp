@@ -56,7 +56,6 @@ FVector GetRandomPointInSemiTorus(float radiusMin, float radiusMax, FVector unit
 
 	float cX = FMath::Sin(randomAngle);
 	float cY = FMath::Cos(randomAngle);
-	UE_LOG(LogTemp, Warning, TEXT("cX = %f, cY = %f"), cX, cY);
 
 	FVector ringPos = FVector(cX, cY, 0);
 	ringPos *= FMath::RandRange(radiusMin, radiusMax);
@@ -77,20 +76,11 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 	const AAIController* cont = OwnerComp.GetAIOwner();
 
 	APawn* enemyPawn = cont->GetPawn();
-	if (!enemyPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("enemyPawn Failed"));
-		return EBTNodeResult::Failed;
-	}
 
 	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
 	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
 
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
-	if (!playerCharacter)
-	{
-		EBTNodeResult::Failed;
-	}
 
 	FVector enemyLocation = enemyPawn->GetActorLocation();
 	FVector playerLocation = playerCharacter->GetActorLocation();
@@ -109,10 +99,7 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 
 		float dist = FVector::Dist(projectedLocation, playerLocation);
 		if (dist < enemyCharacter->safePlayerDistanceMin || dist > enemyCharacter->safePlayerDistanceMax)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("distance Failed, Distance = %f"), dist);
 			continue;
-		}
 
 		FHitResult hit;
 		if (enemyPawn->GetWorld()->LineTraceSingleByChannel(hit, projectedLocation, playerLocation, ECollisionChannel::ECC_Pawn))
@@ -128,11 +115,11 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 
 	}
 
-	DrawDebugSphere(enemyPawn->GetWorld(), projectedLocation, 10.f, 24, FColor::Red, false, 10.f);
+	//DrawDebugSphere(enemyPawn->GetWorld(), projectedLocation, 10.f, 24, FColor::Red, false, 10.f);
 
-	enemyController->MoveToLocation(projectedLocation, 0);
+	enemyController->MoveToLocation(projectedLocation);
 
-	OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 2);
+	OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 3);
 	OwnerComp.GetBlackboardComponent()->SetValueAsVector("currentTarget", projectedLocation);
 
 	return EBTNodeResult::Succeeded;

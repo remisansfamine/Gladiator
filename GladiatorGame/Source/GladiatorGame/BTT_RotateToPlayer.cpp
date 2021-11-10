@@ -27,16 +27,17 @@ EBTNodeResult::Type UBTT_RotateToPlayer::ExecuteTask(UBehaviorTreeComponent& Own
 	APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
 
 
-	if (enumId != 4 && enumId != 3)
+	if (enumId != 5 && enumId != 4)
 	{
 		enemyController->ClearFocus(EAIFocusPriority::Move);
 		enemyCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 		return EBTNodeResult::Succeeded;
 	}
-
+	
+	float deltaTime = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("DeltaTime");
 	enemyCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
-	FRotator rotator = UKismetMathLibrary::RInterpTo(enemyCharacter->GetActorRotation(), lookAt, 0.01f, enemyCharacter->rotateSpeed);
+	FRotator rotator = UKismetMathLibrary::RInterpTo(enemyCharacter->GetActorRotation(), lookAt, deltaTime, enemyCharacter->rotateSpeed);
 
 	enemyCharacter->SetActorRotation(rotator.Quaternion());
 	enemyController->SetFocalPoint(playerCharacter->GetActorLocation(), EAIFocusPriority::Move);

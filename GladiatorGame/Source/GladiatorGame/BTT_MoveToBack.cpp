@@ -18,9 +18,7 @@ UBTT_MoveToBack::UBTT_MoveToBack(const FObjectInitializer& ObjectInitializer) : 
 
 EBTNodeResult::Type UBTT_MoveToBack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	UE_LOG(LogTemp, Warning, TEXT("task execute"));
-
-	const AAIController* cont = OwnerComp.GetAIOwner();
+const AAIController* cont = OwnerComp.GetAIOwner();
 
 	APawn* enemyPawn = cont->GetPawn();
 	if (!enemyPawn)
