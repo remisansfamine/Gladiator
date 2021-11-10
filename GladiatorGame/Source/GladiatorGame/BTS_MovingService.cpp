@@ -23,8 +23,6 @@ void UBTS_MovingService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat("DeltaTime", DeltaSeconds);
 
-	//UE_LOG(LogTemp, Warning, TEXT("CharacterMovement Activate"));
-
 	static int oldEnumId;
 	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
 
