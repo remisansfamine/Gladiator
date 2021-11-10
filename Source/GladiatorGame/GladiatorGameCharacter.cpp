@@ -12,9 +12,14 @@
 #include "LifeComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
 {
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PawnIgnoreCam"));
@@ -56,7 +61,6 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
 
 	canMove = true;
-
 }
 
 void AGladiatorGameCharacter::BeginPlay()
@@ -69,7 +73,6 @@ void AGladiatorGameCharacter::BeginPlay()
 		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
 	}
 }
-
 
 void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -217,16 +220,18 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 	TArray<AActor*> gladiators;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGladiatorGameCharacter::StaticClass(), gladiators);
 
-	TArray<AActor*> validGladiators;
-	for (AActor* gladiator : gladiators)
+	TArray<AGladiatorGameCharacter*> validGladiators;
+	for (AActor* actor : gladiators)
 	{
-		if (gladiator == this)
+		if (actor == this)
 			continue;
 		
-		float distSquared = GetSquaredDistanceTo(gladiator);
+		float distSquared = GetSquaredDistanceTo(actor);
 
-		if (GetSquaredDistanceTo(gladiator) < minDistSquared || GetSquaredDistanceTo(gladiator) > maxDistSquared)
+		if (GetSquaredDistanceTo(actor) < minDistSquared || GetSquaredDistanceTo(actor) > maxDistSquared)
 			continue;
+
+		AGladiatorGameCharacter* gladiator = Cast<AGladiatorGameCharacter>(actor);
 
 		validGladiators.Add(gladiator);
 	}
@@ -234,14 +239,28 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 	if (validGladiators.Num() == 0)
 		return nullptr;
 
-	validGladiators.Sort([this](const AActor& A, const AActor& B)
+	validGladiators.Sort([this](const AGladiatorGameCharacter& A, const AGladiatorGameCharacter& B)
 	{
 		float distA = GetDistanceTo(&A);
 		float distB = GetDistanceTo(&B);
 		return distA < distB;
 	});
 
-	AActor* validActor = validGladiators[0];
+	return validGladiators[0];
+}
 
-	return Cast<AGladiatorGameCharacter>(validActor);
+void AGladiatorGameCharacter::LookAtTarget(AActor* target, float lookSpeed)
+{
+	FVector toLookAt = target->GetActorLocation() - GetActorLocation();
+	FRotator lookAtRot = toLookAt.Rotation();
+
+	FRotator actorLookAt = GetActorRotation();
+	FRotator controllerLookAt = Controller->GetControlRotation();
+	controllerLookAt.Yaw = actorLookAt.Yaw = lookAtRot.Yaw;
+
+	actorLookAt = UKismetMathLibrary::RInterpTo(GetActorRotation(), actorLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+	controllerLookAt = UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), controllerLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+
+	SetActorRotation(actorLookAt);
+	Controller->SetControlRotation(controllerLookAt);
 }

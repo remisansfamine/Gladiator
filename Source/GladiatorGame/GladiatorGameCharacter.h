@@ -91,6 +91,8 @@ protected:
 
 	AGladiatorGameCharacter* GetOtherGladiator(float minDistance, float maxDistance);
 
+	void LookAtTarget(AActor* target, float lookSpeed);
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
 	class ULifeComponent* lifeComponent;
