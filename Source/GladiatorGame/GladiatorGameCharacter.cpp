@@ -16,10 +16,8 @@
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
 {
+	bUseControllerRotationRoll = bUseControllerRotationPitch = bUseControllerRotationYaw = false;
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PawnIgnoreCam"));
@@ -254,12 +252,13 @@ void AGladiatorGameCharacter::LookAtTarget(AActor* target, float lookSpeed)
 	FVector toLookAt = target->GetActorLocation() - GetActorLocation();
 	FRotator lookAtRot = toLookAt.Rotation();
 
-	FRotator actorLookAt = GetActorRotation();
-	FRotator controllerLookAt = Controller->GetControlRotation();
+	FRotator initialActorRot = GetActorRotation(), actorLookAt = initialActorRot;
+	FRotator initialControllerRot = Controller->GetControlRotation(), controllerLookAt = initialControllerRot;
+
 	controllerLookAt.Yaw = actorLookAt.Yaw = lookAtRot.Yaw;
 
-	actorLookAt = UKismetMathLibrary::RInterpTo(GetActorRotation(), actorLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
-	controllerLookAt = UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), controllerLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+	actorLookAt = UKismetMathLibrary::RInterpTo(initialActorRot, actorLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+	controllerLookAt = UKismetMathLibrary::RInterpTo(controllerLookAt, controllerLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
 
 	SetActorRotation(actorLookAt);
 	Controller->SetControlRotation(controllerLookAt);
