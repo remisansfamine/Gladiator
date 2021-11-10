@@ -46,6 +46,9 @@ void ULifeComponent::SetLife(int value)
 {
 	life = value;
 
+	if (OnLifeChanged.IsBound())
+		OnLifeChanged.Broadcast(life);
+
 	if (life <= 0)
 		Kill();
 }

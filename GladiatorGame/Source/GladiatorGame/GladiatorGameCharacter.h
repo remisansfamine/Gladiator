@@ -32,6 +32,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* shield;
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
+	class UBillboardComponent* lifeBar;
+	float initialLifeBarSize;*/
+
 	bool canMove = true;
 	bool isAlive = true;
 
@@ -42,6 +46,9 @@ public:
 	float BaseLookUpRate;
 
 protected:
+	UFUNCTION()
+	void OnLifeChanged(int newLife);
+
 	UFUNCTION()
 	void OnInvicibilityStop();
 
