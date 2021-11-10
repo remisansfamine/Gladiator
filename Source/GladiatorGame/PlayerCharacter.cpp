@@ -61,8 +61,6 @@ void APlayerCharacter::SetCameraLockOn()
 
 	cameraLockTarget = GetOtherGladiator(minLockOnDistance, maxLockOnDistance);
 
-	//CameraBoom->bUsePawnControlRotation = false; // Rotate the arm based on the controller
-
 	if (!cameraLockTarget)
 		SetCameraLockOff();
 }
@@ -70,7 +68,5 @@ void APlayerCharacter::SetCameraLockOn()
 void APlayerCharacter::SetCameraLockOff()
 {
 	isLocking = false;
-
-	//CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	cameraLockTarget = nullptr;
 }

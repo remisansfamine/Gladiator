@@ -124,6 +124,8 @@ void AGladiatorGameCharacter::OnHurt()
 
 void AGladiatorGameCharacter::OnDeath()
 {
+	isAlive = false;
+
 	setCameraShake(camShake, 1.25f);
 
 	SetAttackState(false);
@@ -230,6 +232,9 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 			continue;
 
 		AGladiatorGameCharacter* gladiator = Cast<AGladiatorGameCharacter>(actor);
+
+		if (!gladiator->isAlive)
+			continue;
 
 		validGladiators.Add(gladiator);
 	}

@@ -33,6 +33,7 @@ protected:
 	class USkeletalMeshComponent* shield;
 
 	bool canMove = true;
+	bool isAlive = true;
 
 public:
 	AGladiatorGameCharacter();
