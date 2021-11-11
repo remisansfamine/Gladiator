@@ -33,7 +33,8 @@ protected:
 	class USkeletalMeshComponent* shield;
 
 	bool canMove = true;
-
+	bool canAttack = true;
+	bool canDefend = true;
 public:
 	AGladiatorGameCharacter();
 
