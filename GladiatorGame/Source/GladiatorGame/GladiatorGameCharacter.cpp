@@ -91,6 +91,9 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
 {
+	if (hammer)
+		hammer->SetVectorParameterValueOnMaterials("FlickerColor", attacking * FVector(0.9f, 0.f, 0.f));
+
 	weaponCollider->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }
 
@@ -153,26 +156,27 @@ void AGladiatorGameCharacter::SetState(ECharacterState state)
 
 void AGladiatorGameCharacter::Attack()
 {
-	if (characterState == ECharacterState::ATTACKING)
+	if (!canAttack)
 		return;
 
-	canMove = false;
+	canDefend = canAttack = canMove = false;
 	SetState(ECharacterState::ATTACKING);
 }
 
 void AGladiatorGameCharacter::Defend(bool defending)
 {
-	if (characterState == ECharacterState::ATTACKING)
+	if (!canDefend)
 		return;
 
 	canMove = true;
+	canAttack = !defending;
 	SetState(defending ? ECharacterState::DEFENDING : ECharacterState::IDLE);
 }
 
 void AGladiatorGameCharacter::Idle()
 {
-	canMove = true;
 	SetState(ECharacterState::IDLE);
+	canMove = canDefend = canAttack = true;
 }
 
 void AGladiatorGameCharacter::MoveForward(float Value)
