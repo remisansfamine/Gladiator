@@ -15,12 +15,14 @@ class GLADIATORGAME_API AAIEnemyManager : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Settings, meta = (AllowPrivateAccess = "true"))
 	TArray<AAIC_Enemy*> enemies;
 	
-	int lastEnemyIndex;
+	int lastEnemyIndex = -1;
 
 	void GetAllEnemyInRadius(TArray<int>& indexs);
 	int RandomEnemy();
 	int ClosestEnemy();
 	int LastEnemy();
+
+	void LaunchAttack();
 
 public:	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
@@ -28,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
 		float safePlayerDistanceMax;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+		float attackDelay;
 	// Sets default values for this actor's properties
 	AAIEnemyManager();
 

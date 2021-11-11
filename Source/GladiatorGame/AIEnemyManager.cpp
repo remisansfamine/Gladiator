@@ -21,7 +21,7 @@ void AAIEnemyManager::BeginPlay()
 
 void AAIEnemyManager::GetAllEnemyInRadius(TArray<int>& indexs)
 {
-	for (int i = 0; i < enemies.GetTypeSize(); i++)
+	for (unsigned i = 0; i < enemies.GetTypeSize(); i++)
 	{
 		if (enemies[i]->GetBlackboardComponent()->GetValueAsFloat("Distance") < safePlayerDistanceMax)
 			indexs.Add(i);
@@ -44,7 +44,7 @@ int AAIEnemyManager::ClosestEnemy()
 	int index = -1;
 	float minDistance = -1.f;
 
-	for (int i = 0; i < enemies.GetTypeSize(); i++)
+	for (unsigned i = 0; i < enemies.GetTypeSize(); i++)
 	{
 		float distance = enemies[i]->GetBlackboardComponent()->GetValueAsFloat("Distance");
 		if (minDistance >= distance)
@@ -62,7 +62,19 @@ int AAIEnemyManager::ClosestEnemy()
 
 int AAIEnemyManager::LastEnemy()
 {
+	if (lastEnemyIndex < 0)
+		return -1;
+	
+	if (enemies[lastEnemyIndex]->GetBlackboardComponent()->GetValueAsFloat("Distance") > safePlayerDistanceMax)
+		return -1;
 
+	return lastEnemyIndex;
+}
+
+void AAIEnemyManager::LaunchAttack()
+{
+	FTimerHandle outHandleTime;
+	GetWorldTimerManager().SetTimer(outHandleTime, this, &AAIEnemyManager::LaunchAttack, attackDelay, false);
 }
 
 // Called every frame
