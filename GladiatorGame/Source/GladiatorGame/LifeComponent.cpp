@@ -3,13 +3,6 @@
 
 #include "LifeComponent.h"
 
-// Sets default values for this component's properties
-ULifeComponent::ULifeComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-
-}
-
 void ULifeComponent::Hurt(int damage) 
 { 
 	if (isInvicible)

@@ -30,6 +30,8 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 public:
 	APlayerCharacter();
 
+	virtual void BeginPlay() override;
+
 	void CameraLock();
 
 	UFUNCTION()
