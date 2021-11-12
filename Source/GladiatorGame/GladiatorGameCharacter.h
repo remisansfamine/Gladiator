@@ -75,9 +75,6 @@ protected:
 	void SetState(ECharacterState state);
 
 	UFUNCTION(BlueprintCallable)
-	virtual void Attack();
-
-	UFUNCTION(BlueprintCallable)
 	virtual void Defend(bool defending);
 
 	UFUNCTION(BlueprintCallable)
@@ -104,7 +101,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Life", meta = (AllowPrivateAccess = "true"))
 	class ULifeComponent* lifeComponent = nullptr;
 
-	/** Returns CameraBoom subobject **/
+	UFUNCTION(BlueprintCallable)
+	virtual void Attack();
+
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }	

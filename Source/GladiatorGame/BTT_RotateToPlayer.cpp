@@ -7,6 +7,10 @@
 #include "EnemyCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Controller.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 UBTT_RotateToPlayer::UBTT_RotateToPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -17,24 +21,18 @@ EBTNodeResult::Type UBTT_RotateToPlayer::ExecuteTask(UBehaviorTreeComponent& Own
 {
 	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
 
-	const AAIController* cont = OwnerComp.GetAIOwner();
-	AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(cont->GetPawn());
+	AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
-	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
+	APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
 
-
-	if (enumId != 4 && enumId != 2)
+	if (enumId == 5 || enumId == 4)
 	{
-		enemyController->bSetControlRotationFromPawnOrientation = 1;
-		return EBTNodeResult::Succeeded;
+		float deltaTime = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("DeltaTime");
+		FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
+		FRotator rotator = UKismetMathLibrary::RInterpTo(enemyCharacter->GetActorRotation(), lookAt, deltaTime, enemyCharacter->rotateSpeed);
+
+		enemyCharacter->SetActorRotation(rotator.Quaternion());
 	}
-
-	enemyController->bSetControlRotationFromPawnOrientation = 0;
-
-	FQuat quaternion = FQuat::FindBetweenVectors(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
-
-	FRotator rotator = FRotator::MakeFromEuler(FVector(0, 0, quaternion.Z));
-	enemyCharacter->SetActorRotation(quaternion, ETeleportType::None);
 
 	return EBTNodeResult::Succeeded;
 }
