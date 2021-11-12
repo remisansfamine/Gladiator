@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ActorInterComponent.h"
 #include "LifeComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLifeDelegate);
@@ -31,9 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
 	float invicibleCooldown;
 
-	// Sets default values for this component's properties
-	ULifeComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
 	UFUNCTION(BlueprintCallable)
 	void Hurt(int damage);
 	
@@ -45,6 +43,9 @@ public:
 public:
 	int GetLife() { return life; }
 	int GetMaxLife() { return maxLife; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetLifePercent() { return (float)life / (float)maxLife; }
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
 	FLifeChangedDelegate OnLifeChanged;

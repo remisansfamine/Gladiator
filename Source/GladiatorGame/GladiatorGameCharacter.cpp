@@ -5,7 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
-#include "Components/BillboardComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -16,6 +17,7 @@
 #include "Kismet/KismetMathLibrary.h"
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
+	: Super()
 {
 	bUseControllerRotationRoll = bUseControllerRotationPitch = bUseControllerRotationYaw = false;
 
@@ -54,17 +56,7 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
-	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
-	lifeComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
-	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
-	lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
-	lifeComponent->OnLifeChanged.AddDynamic(this, &AGladiatorGameCharacter::OnLifeChanged);
-
-	//lifeBar = CreateDefaultSubobject<UBillboardComponent>("LifeBar");
-	//lifeBar->SetupAttachment(RootComponent);
-	//lifeBar->SetUsingAbsoluteScale(true);
-	//
-	//lifeBar->bVisualizeComponent = true;
+	lifeComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
 
 	canMove = true;
 }
@@ -73,13 +65,18 @@ void AGladiatorGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//if (lifeBar)
-	//	initialLifeBarSize = lifeBar->GetComponentScale().X;
-
 	if (weaponCollider)
 	{
 		weaponCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
+	}
+
+	if (lifeComponent)
+	{
+		lifeComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
+		lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
+		lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
+		lifeComponent->OnLifeChanged.AddDynamic(this, &AGladiatorGameCharacter::OnLifeChanged);
 	}
 }
 

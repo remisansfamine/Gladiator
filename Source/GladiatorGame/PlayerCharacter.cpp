@@ -12,6 +12,13 @@ APlayerCharacter::APlayerCharacter()
 {
 	ActivateCamera();
 
+
+}
+
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
 	lifeComponent->SetLife(5);
 	lifeComponent->invicibleCooldown = 1.f;
 }

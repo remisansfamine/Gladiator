@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "CharacterState.h"
+#include "Blueprint/UserWidget.h"
 #include "GladiatorGameCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterState, ECharacterState, characterState);
@@ -31,10 +32,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* shield;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
-	class UBillboardComponent* lifeBar;
-	float initialLifeBarSize;*/
 
 	bool canMove = true;
 	bool canAttack = true;
@@ -104,8 +101,8 @@ protected:
 	void LookAtTarget(AActor* target, float lookSpeed);
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
-	class ULifeComponent* lifeComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Life", meta = (AllowPrivateAccess = "true"))
+	class ULifeComponent* lifeComponent = nullptr;
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
