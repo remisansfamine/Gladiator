@@ -36,7 +36,9 @@ public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
 	float wantedRoomRadius;
 
-private :
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+		float attackDistance;
 
+private :
 	class APlayerCharacter* playerCharacter;
 };

@@ -67,8 +67,6 @@ protected:
 
 	void SetState(ECharacterState state);
 
-	UFUNCTION(BlueprintCallable)
-	virtual void Attack();
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Defend(bool defending);
@@ -92,6 +90,9 @@ protected:
 	AGladiatorGameCharacter* GetOtherGladiator(float minDistance, float maxDistance);
 
 public:
+	UFUNCTION(BlueprintCallable)
+	virtual void Attack();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
 	class ULifeComponent* lifeComponent;
 

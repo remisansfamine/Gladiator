@@ -17,11 +17,12 @@ AAIEnemyManager::AAIEnemyManager()
 void AAIEnemyManager::BeginPlay()
 {
 	Super::BeginPlay();
+	LaunchAttackDelay();
 }
 
 void AAIEnemyManager::GetAllEnemyInRadius(TArray<int>& indexs)
 {
-	for (unsigned i = 0; i < enemies.GetTypeSize(); i++)
+	for (int i = 0; i < enemies.Num(); i++)
 	{
 		if (enemies[i]->GetBlackboardComponent()->GetValueAsFloat("Distance") < safePlayerDistanceMax)
 			indexs.Add(i);
@@ -33,18 +34,18 @@ int AAIEnemyManager::RandomEnemy()
 	TArray<int> indexs;
 	GetAllEnemyInRadius(indexs);
 
-	if (indexs.GetTypeSize() == 0)
+	if (indexs.Num() == 0)
 		return -1;
 
-	return FMath::FRandRange(0, indexs.GetTypeSize());
+	return FMath::FRandRange(0, indexs.Num());
 }
 
 int AAIEnemyManager::ClosestEnemy()
 {
 	int index = -1;
-	float minDistance = -1.f;
+	float minDistance = 999999.f;
 
-	for (unsigned i = 0; i < enemies.GetTypeSize(); i++)
+	for (int i = 0; i < enemies.Num(); i++)
 	{
 		float distance = enemies[i]->GetBlackboardComponent()->GetValueAsFloat("Distance");
 		if (minDistance >= distance)
@@ -62,25 +63,70 @@ int AAIEnemyManager::ClosestEnemy()
 
 int AAIEnemyManager::LastEnemy()
 {
-	if (lastEnemyIndex < 0)
-		return -1;
 	
-	if (enemies[lastEnemyIndex]->GetBlackboardComponent()->GetValueAsFloat("Distance") > safePlayerDistanceMax)
+	if (lastEnemyIndex == -1 || enemies[lastEnemyIndex]->GetBlackboardComponent()->GetValueAsFloat("Distance") > safePlayerDistanceMax)
 		return -1;
 
 	return lastEnemyIndex;
 }
 
+void AAIEnemyManager::LaunchAttackDelay()
+{
+	FTimerHandle outHandleTime; 
+	GetWorldTimerManager().SetTimer(outHandleTime, this, &AAIEnemyManager::LaunchAttack, attackDelay, false);
+}
+
 void AAIEnemyManager::LaunchAttack()
 {
-	FTimerHandle outHandleTime;
-	GetWorldTimerManager().SetTimer(outHandleTime, this, &AAIEnemyManager::LaunchAttack, attackDelay, false);
+	if (enemies.Num() == 0)
+	{
+		LaunchAttackDelay();
+		return;
+	}
+	int rand = FMath::RandRange(0, 2);
+	int id;
+
+	switch (rand)
+	{
+	case 0:
+		id = ClosestEnemy();
+		break;
+	case 1:
+		id = RandomEnemy();
+		break;
+	case 2:
+		id = LastEnemy();
+		break;
+	}
+
+	if (id == -1)
+	{
+		LaunchAttackDelay();
+		return;
+	}
+
+	enemies[id]->LaunchAttack();
+	lastEnemyIndex = id;
+}
+
+void AAIEnemyManager::AttackTerminated()
+{
+	LaunchAttackDelay();
+}
+
+void AAIEnemyManager::AddEnemy(AAIC_Enemy* enemyController)
+{
+	enemies.Add(enemyController);
+}
+
+void AAIEnemyManager::DeleteEnemy(AAIC_Enemy* enemyController)
+{
+	enemies.Remove(enemyController);
 }
 
 // Called every frame
 void AAIEnemyManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
