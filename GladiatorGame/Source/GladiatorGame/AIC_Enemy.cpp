@@ -10,6 +10,8 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/CrowdFollowingComponent.h"
+#include "AIEnemyManager.h"
+#include "EngineUtils.h"
 
 AAIC_Enemy::AAIC_Enemy(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer)
@@ -33,6 +35,25 @@ void AAIC_Enemy::BeginPlay()
 	behaviorTreeComponent->StartTree(*btree);
 	
 	blackboard->SetValueAsObject("PlayerActor", UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	FindAIEnemyManager();
+
+}
+
+void AAIC_Enemy::FindAIEnemyManager()
+{
+	for (TActorIterator<AAIEnemyManager> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AAIEnemyManager* aiEnemyManagerCast = Cast<AAIEnemyManager>(*ActorItr);
+		if (aiEnemyManagerCast)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy Manager found!"));
+			aiEnemyManager = aiEnemyManagerCast;
+			aiEnemyManager->AddEnemy(this);
+			return;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Enemy Manager not found!"));
 }
 
 void AAIC_Enemy::OnPossess(APawn* const pawn)
@@ -43,7 +64,17 @@ void AAIC_Enemy::OnPossess(APawn* const pawn)
 void AAIC_Enemy::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
-	//blackboard->SetValueAsString("Debug", TEXT("Life = ") + FString::FromInt(character->lifeComponent->GetLife()));
+}
+
+void AAIC_Enemy::LaunchAttack()
+{
+	blackboard->SetValueAsEnum("MovingState", 6);
+}
+
+void AAIC_Enemy::AttackTerminated()
+{
+	blackboard->SetValueAsEnum("MovingState", 0);
+	aiEnemyManager->AttackTerminated();
 }
 
 

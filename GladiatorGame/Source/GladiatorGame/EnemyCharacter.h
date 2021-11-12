@@ -25,12 +25,14 @@ protected:
 
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
-	float safePlayerDistanceMin;
+	float rotateSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
-	float safePlayerDistanceMax;
+	float wantedRoomRadius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	float attackDistance;
 
 private :
-
 	class APlayerCharacter* playerCharacter;
 };

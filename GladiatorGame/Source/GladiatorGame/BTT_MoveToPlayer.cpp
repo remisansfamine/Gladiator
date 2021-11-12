@@ -16,23 +16,10 @@ UBTT_MoveToPlayer::UBTT_MoveToPlayer(const FObjectInitializer& ObjectInitializer
 
 EBTNodeResult::Type UBTT_MoveToPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	const AAIController* cont = OwnerComp.GetAIOwner();
-
-	APawn* enemyPawn = cont->GetPawn();
-	if (!enemyPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("enemyPawn Failed"));
-		return EBTNodeResult::Failed;
-	}
-
-	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
+	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
 	
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
-	if (!playerCharacter)
-	{
-		EBTNodeResult::Failed;
-	}
 
 	float playerSpeed = FVector::VectorPlaneProject(playerCharacter->GetVelocity(), FVector(0, 0, 1)).Size();
 

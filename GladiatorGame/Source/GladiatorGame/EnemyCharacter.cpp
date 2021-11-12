@@ -7,19 +7,17 @@
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
+
 AEnemyCharacter::AEnemyCharacter()
 	: AGladiatorGameCharacter()
 {
-
-
+	lifeComponent->SetLife(3);
+	lifeComponent->invicibleCooldown = 0.5f;
 }
 
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	lifeComponent->SetLife(3);
-	lifeComponent->invicibleCooldown = 0.5f;
 
 	playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 }

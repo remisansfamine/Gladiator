@@ -14,19 +14,19 @@ UBTD_CheckMove::UBTD_CheckMove(const FObjectInitializer& ObjectInitializer) : Su
 
 bool UBTD_CheckMove::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	if (OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState") != 0)
+	if (OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState") != 1)
 		return false;
 
-	const AAIController* cont = OwnerComp.GetAIOwner();
-
-	APawn* enemyPawn = cont->GetPawn();
-	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
-
 	float playerSpeed = FVector::VectorPlaneProject(playerCharacter->GetVelocity(), FVector(0, 0, 1)).Size();
+	
 	if (playerSpeed == 0)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 1);
+		OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 0);
+
+		const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OwnerComp.GetAIOwner()->GetPawn());
+		enemyCharacter->GetController()->StopMovement();
+
 		return false;
 	}
 
