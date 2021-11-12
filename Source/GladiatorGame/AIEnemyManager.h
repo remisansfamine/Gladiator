@@ -22,9 +22,11 @@ class GLADIATORGAME_API AAIEnemyManager : public AActor
 	int ClosestEnemy();
 	int LastEnemy();
 
+	void LaunchAttackDelay();
 	void LaunchAttack();
 
 public:	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
 		float safePlayerDistanceMin;
 
@@ -35,6 +37,10 @@ public:
 		float attackDelay;
 	// Sets default values for this actor's properties
 	AAIEnemyManager();
+
+	void AddEnemy(AAIC_Enemy* enemyController);
+	void DeleteEnemy(AAIC_Enemy* enemyController);
+	void AttackTerminated();
 
 protected:
 	// Called when the game starts or when spawned
