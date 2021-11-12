@@ -73,6 +73,9 @@ FVector GetRandomPointInSemiTorus(float radiusMin, float radiusMax, FVector unit
 
 EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	float safePlayerDistanceMin = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMin");
+	float safePlayerDistanceMax = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMax");
+
 	const AAIController* cont = OwnerComp.GetAIOwner();
 
 	APawn* enemyPawn = cont->GetPawn();
@@ -95,13 +98,13 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 	{
 		iteration++;
 
-		FVector randomLocation = GetRandomPointInSemiTorus(enemyCharacter->safePlayerDistanceMin,
-			enemyCharacter->safePlayerDistanceMax, playerEnemyDir);
+		FVector randomLocation = GetRandomPointInSemiTorus(safePlayerDistanceMin,
+			safePlayerDistanceMax, playerEnemyDir);
 
 		projectedLocation = ProjectPointOnNavigableLocation(randomLocation + playerLocation, enemyPawn);
 
 		float dist = FVector::Dist(projectedLocation, playerLocation);
-		if (dist < enemyCharacter->safePlayerDistanceMin || dist > enemyCharacter->safePlayerDistanceMax)
+		if (dist < safePlayerDistanceMin || dist > safePlayerDistanceMax)
 			continue;
 
 		if (checkIfPawnEnemyIsFront(projectedLocation, playerLocation, enemyPawn))

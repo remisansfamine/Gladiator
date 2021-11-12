@@ -14,11 +14,6 @@ UBTS_AttackService::UBTS_AttackService(const FObjectInitializer& ObjectInitializ
 
 void UBTS_AttackService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	//AAIController* cont = OwnerComp.GetAIOwner();
-	//
-	//if (const AEnemyCharacter* character = Cast<AEnemyCharacter>(cont->GetPawn()))
-	//	cont->GetBlackboardComponent()->SetValueAsString(GetSelectedBlackboardKey(), TEXT("TEST"));
-
 	const AAIController* cont = OwnerComp.GetAIOwner();
 
 	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(cont->GetPawn());

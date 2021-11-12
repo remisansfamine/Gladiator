@@ -10,7 +10,6 @@ AAIEnemyManager::AAIEnemyManager()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -117,6 +116,8 @@ void AAIEnemyManager::AttackTerminated()
 void AAIEnemyManager::AddEnemy(AAIC_Enemy* enemyController)
 {
 	enemies.Add(enemyController);
+	enemyController->GetBlackboardComponent()->SetValueAsFloat("safePlayerDistanceMin", safePlayerDistanceMin);
+	enemyController->GetBlackboardComponent()->SetValueAsFloat("safePlayerDistanceMax", safePlayerDistanceMax);
 }
 
 void AAIEnemyManager::DeleteEnemy(AAIC_Enemy* enemyController)

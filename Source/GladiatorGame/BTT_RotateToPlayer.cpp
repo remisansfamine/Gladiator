@@ -32,8 +32,6 @@ EBTNodeResult::Type UBTT_RotateToPlayer::ExecuteTask(UBehaviorTreeComponent& Own
 		FRotator rotator = UKismetMathLibrary::RInterpTo(enemyCharacter->GetActorRotation(), lookAt, deltaTime, enemyCharacter->rotateSpeed);
 
 		enemyCharacter->SetActorRotation(rotator.Quaternion());
-
-		//enemyController->SetFocalPoint(playerCharacter->GetActorLocation(), EAIFocusPriority::Move);
 	}
 
 	return EBTNodeResult::Succeeded;
