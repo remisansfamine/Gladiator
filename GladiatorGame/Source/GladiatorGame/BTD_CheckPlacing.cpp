@@ -17,6 +17,8 @@ UBTD_CheckPlacing::UBTD_CheckPlacing(const FObjectInitializer& ObjectInitializer
 
 bool UBTD_CheckPlacing::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
+	float safePlayerDistanceMin = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMin");
+	float safePlayerDistanceMax = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMax");
 	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
 	if (enumId == 1)
 		return false;
@@ -29,7 +31,9 @@ bool UBTD_CheckPlacing::CalculateRawConditionValue(UBehaviorTreeComponent& Owner
 	if (enumId != 5 && enumId != 1)
 	{
 		float playerSpeed = FVector::VectorPlaneProject(playerCharacter->GetVelocity(), FVector(0, 0, 1)).Size();
-		if (playerSpeed > 0 && FVector::Dist(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation()) > enemyCharacter->safePlayerDistanceMax)
+
+		if (playerSpeed > 0 && 
+			FVector::Dist(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation()) > safePlayerDistanceMax)
 		{
 			OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 1);
 			return false;
@@ -42,7 +46,7 @@ bool UBTD_CheckPlacing::CalculateRawConditionValue(UBehaviorTreeComponent& Owner
 		FVector desiredTarget = ProjectPointOnNavigableLocation(enemyCharacter->GetActorLocation(), enemyPawn);
 		float distance = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("Distance");
 		
-		if (distance < enemyCharacter->safePlayerDistanceMax && distance > enemyCharacter->safePlayerDistanceMin)
+		if (distance < safePlayerDistanceMax && distance > safePlayerDistanceMin)
 		{
 			if (checkIfPawnIsInSphere(enemyCharacter->wantedRoomRadius, desiredTarget, enemyPawn))
 			{

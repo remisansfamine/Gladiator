@@ -14,6 +14,9 @@ UBTS_CheckPlayerDistance::UBTS_CheckPlayerDistance(const FObjectInitializer& Obj
 
 bool UBTS_CheckPlayerDistance::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
+	float safePlayerDistanceMin = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMin");
+	float safePlayerDistanceMax = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMax");
+
 	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
 	float distance = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("Distance");
 
@@ -22,7 +25,7 @@ bool UBTS_CheckPlayerDistance::CalculateRawConditionValue(UBehaviorTreeComponent
 
 	if (enumId != 5)
 	{
-		if (distance <= enemyCharacter->safePlayerDistanceMin)
+		if (distance <= safePlayerDistanceMin)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("distance Failed, Distance = %f"), distance);
 
@@ -33,8 +36,8 @@ bool UBTS_CheckPlayerDistance::CalculateRawConditionValue(UBehaviorTreeComponent
 	}
 	else //GoBack
 	{
-		float distanceMin = enemyCharacter->safePlayerDistanceMin + 
-			(enemyCharacter->safePlayerDistanceMax - enemyCharacter->safePlayerDistanceMin) / 2;
+		float distanceMin = safePlayerDistanceMin + 
+			(safePlayerDistanceMax - safePlayerDistanceMin) / 2;
 
 		if (distance > distanceMin)
 		{
