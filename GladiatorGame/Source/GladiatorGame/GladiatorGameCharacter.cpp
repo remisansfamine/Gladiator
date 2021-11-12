@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/BillboardComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -12,9 +13,12 @@
 #include "LifeComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
 {
+	bUseControllerRotationRoll = bUseControllerRotationPitch = bUseControllerRotationYaw = false;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PawnIgnoreCam"));
@@ -54,14 +58,23 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	lifeComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
 	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
 	lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
+	lifeComponent->OnLifeChanged.AddDynamic(this, &AGladiatorGameCharacter::OnLifeChanged);
+
+	//lifeBar = CreateDefaultSubobject<UBillboardComponent>("LifeBar");
+	//lifeBar->SetupAttachment(RootComponent);
+	//lifeBar->SetUsingAbsoluteScale(true);
+	//
+	//lifeBar->bVisualizeComponent = true;
 
 	canMove = true;
-
 }
 
 void AGladiatorGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//if (lifeBar)
+	//	initialLifeBarSize = lifeBar->GetComponentScale().X;
 
 	if (weaponCollider)
 	{
@@ -69,7 +82,6 @@ void AGladiatorGameCharacter::BeginPlay()
 		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
 	}
 }
-
 
 void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -118,6 +130,13 @@ void AGladiatorGameCharacter::setCameraShake(const TSubclassOf<UCameraShakeBase>
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(shakeClass, scale);
 }
 
+void AGladiatorGameCharacter::OnLifeChanged(int newLife)
+{
+	//float barSize = lifeBar->GetComponentScale().X;
+	//barSize = initialLifeBarSize * (float)newLife / (float)lifeComponent->GetMaxLife();
+
+}
+
 void AGladiatorGameCharacter::OnHurt()
 {
 	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(1.f, 0.f, 0.f));
@@ -126,6 +145,8 @@ void AGladiatorGameCharacter::OnHurt()
 
 void AGladiatorGameCharacter::OnDeath()
 {
+	isAlive = false;
+
 	setCameraShake(camShake, 1.25f);
 
 	SetAttackState(false);
@@ -221,15 +242,20 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 	TArray<AActor*> gladiators;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGladiatorGameCharacter::StaticClass(), gladiators);
 
-	TArray<AActor*> validGladiators;
-	for (AActor* gladiator : gladiators)
+	TArray<AGladiatorGameCharacter*> validGladiators;
+	for (AActor* actor : gladiators)
 	{
-		if (gladiator == this)
+		if (actor == this)
 			continue;
 		
-		float distSquared = GetSquaredDistanceTo(gladiator);
+		float distSquared = GetSquaredDistanceTo(actor);
 
-		if (GetSquaredDistanceTo(gladiator) < minDistSquared || GetSquaredDistanceTo(gladiator) > maxDistSquared)
+		if (GetSquaredDistanceTo(actor) < minDistSquared || GetSquaredDistanceTo(actor) > maxDistSquared)
+			continue;
+
+		AGladiatorGameCharacter* gladiator = Cast<AGladiatorGameCharacter>(actor);
+
+		if (!gladiator->isAlive)
 			continue;
 
 		validGladiators.Add(gladiator);
@@ -238,14 +264,29 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 	if (validGladiators.Num() == 0)
 		return nullptr;
 
-	validGladiators.Sort([this](const AActor& A, const AActor& B)
+	validGladiators.Sort([this](const AGladiatorGameCharacter& A, const AGladiatorGameCharacter& B)
 	{
 		float distA = GetDistanceTo(&A);
 		float distB = GetDistanceTo(&B);
 		return distA < distB;
 	});
 
-	AActor* validActor = validGladiators[0];
+	return validGladiators[0];
+}
 
-	return Cast<AGladiatorGameCharacter>(validActor);
+void AGladiatorGameCharacter::LookAtTarget(AActor* target, float lookSpeed)
+{
+	FVector toLookAt = target->GetActorLocation() - GetActorLocation();
+	FRotator lookAtRot = toLookAt.Rotation();
+
+	FRotator initialActorRot = GetActorRotation(), actorLookAt = initialActorRot;
+	FRotator initialControllerRot = Controller->GetControlRotation(), controllerLookAt = initialControllerRot;
+
+	controllerLookAt.Yaw = actorLookAt.Yaw = lookAtRot.Yaw;
+
+	actorLookAt = UKismetMathLibrary::RInterpTo(initialActorRot, actorLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+	controllerLookAt = UKismetMathLibrary::RInterpTo(controllerLookAt, controllerLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+
+	SetActorRotation(actorLookAt);
+	Controller->SetControlRotation(controllerLookAt);
 }

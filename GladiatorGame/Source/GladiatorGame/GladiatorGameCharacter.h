@@ -32,9 +32,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* shield;
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))
+	class UBillboardComponent* lifeBar;
+	float initialLifeBarSize;*/
+
 	bool canMove = true;
 	bool canAttack = true;
 	bool canDefend = true;
+	bool isAlive = true;
+
 public:
 	AGladiatorGameCharacter();
 
@@ -42,6 +48,9 @@ public:
 	float BaseLookUpRate;
 
 protected:
+	UFUNCTION()
+	void OnLifeChanged(int newLife);
+
 	UFUNCTION()
 	void OnInvicibilityStop();
 
@@ -91,6 +100,8 @@ protected:
 	TSubclassOf<UMatineeCameraShake> camShake;
 
 	AGladiatorGameCharacter* GetOtherGladiator(float minDistance, float maxDistance);
+
+	void LookAtTarget(AActor* target, float lookSpeed);
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Life, meta = (AllowPrivateAccess = "true"))

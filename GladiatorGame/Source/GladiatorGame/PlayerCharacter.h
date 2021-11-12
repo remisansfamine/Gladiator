@@ -14,9 +14,7 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 {
 	GENERATED_BODY()
 
-	AGladiatorGameCharacter* target;
-
-	void LookAtTarget();
+	AGladiatorGameCharacter* cameraLockTarget;
 
 	UPROPERTY(EditAnywhere)
 	float lockOnSpeed = 2.5f;
@@ -27,14 +25,18 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 	UPROPERTY(EditAnywhere)
 	float maxLockOnDistance = 500.f;
 
-public :
+	bool isLocking = false;
+
+public:
 	APlayerCharacter();
 
-	UFUNCTION()
-	void LockOn();
+	void CameraLock();
 
 	UFUNCTION()
-	void LockOff();
+	void SetCameraLock();
+
+	void SetCameraLockOn();
+	void SetCameraLockOff();
 
 	void Tick(float DeltaTime) override;
 
