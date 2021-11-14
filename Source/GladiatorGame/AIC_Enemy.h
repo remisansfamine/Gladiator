@@ -24,6 +24,14 @@ public :
 
 	class UBlackboardComponent* GetBB() const;
 
+	class AAIEnemyManager* aiEnemyManager;
+
+	void FindAIEnemyManager();
+	void LaunchAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackTerminated();
+
 private :
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
@@ -33,4 +41,5 @@ private :
 	class UBehaviorTree* btree;
 
 	class UBlackboardComponent* blackboard;
+
 };

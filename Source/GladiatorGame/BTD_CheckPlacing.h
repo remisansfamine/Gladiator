@@ -18,4 +18,5 @@ public:
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const;
 };
 
-bool checkIfPawnIsInSphere(float radius, const FVector& start, const FVector& end, APawn* ownPawn);
+bool checkIfPawnIsInSphere(float radius, const FVector& center, APawn* ownPawn);
+bool checkIfPawnEnemyIsFront(const FVector& start, const FVector& end, const APawn* ownPawn);
