@@ -123,7 +123,7 @@ void AGladiatorGameCharacter::OnHurt()
 
 void AGladiatorGameCharacter::OnDeath()
 {
-	setCameraShake(camShake, 1.25f);
+   setCameraShake(camShake, 1.25f);
 
 	SetAttackState(false);
 	SetState(ECharacterState::IDLE);
