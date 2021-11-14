@@ -82,8 +82,9 @@ void AAIEnemyManager::LaunchAttack()
 		LaunchAttackDelay();
 		return;
 	}
+
 	int rand = FMath::RandRange(0, 2);
-	int id;
+	int id = -1;
 
 	switch (rand)
 	{
@@ -98,11 +99,18 @@ void AAIEnemyManager::LaunchAttack()
 		break;
 	}
 
+	FString name("NoName");
+	if (id != -1)
+		enemies[id]->GetName(name);
+
+	UE_LOG(LogTemp, Warning, TEXT("Id = %i, EnemyName = %s"), id, *name);
+
 	if (id == -1)
 	{
 		LaunchAttackDelay();
 		return;
 	}
+
 
 	enemies[id]->LaunchAttack();
 	lastEnemyIndex = id;

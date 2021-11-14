@@ -14,6 +14,9 @@ class GLADIATORGAME_API AEnemyCharacter : public AGladiatorGameCharacter
 {
 	GENERATED_BODY()
 
+	UFUNCTION()
+	void OnDeathEnemy();
+
 public :
 	AEnemyCharacter();
 	
