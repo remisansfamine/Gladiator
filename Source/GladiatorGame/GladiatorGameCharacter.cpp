@@ -56,7 +56,7 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
-	lifeComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
+	healthComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
 
 	canMove = true;
 }
@@ -71,12 +71,11 @@ void AGladiatorGameCharacter::BeginPlay()
 		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
 	}
 
-	if (lifeComponent)
+	if (healthComponent)
 	{
-		lifeComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
-		lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
-		lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
-		lifeComponent->OnLifeChanged.AddDynamic(this, &AGladiatorGameCharacter::OnLifeChanged);
+		healthComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
+		healthComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
+		healthComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
 	}
 }
 
@@ -90,9 +89,9 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 	if (!other)
 		return;
 
-	ULifeComponent* otherLifeComp = other->lifeComponent;
+	ULifeComponent* otherLifeComp = other->healthComponent;
 
-	if (!other->lifeComponent)
+	if (!otherLifeComp)
 		return;
 
 	otherLifeComp->Hurt(1);
@@ -125,13 +124,6 @@ void AGladiatorGameCharacter::setCameraShake(const TSubclassOf<UCameraShakeBase>
 {
 	if (shakeClass)
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(shakeClass, scale);
-}
-
-void AGladiatorGameCharacter::OnLifeChanged(int newLife)
-{
-	//float barSize = lifeBar->GetComponentScale().X;
-	//barSize = initialLifeBarSize * (float)newLife / (float)lifeComponent->GetMaxLife();
-
 }
 
 void AGladiatorGameCharacter::OnHurt()
