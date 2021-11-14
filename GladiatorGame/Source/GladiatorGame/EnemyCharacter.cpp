@@ -23,7 +23,7 @@ void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	lifeComponent->OnKill.AddDynamic(this, &AEnemyCharacter::OnDeathEnemy);
+	healthComponent->OnKill.AddDynamic(this, &AEnemyCharacter::OnDeathEnemy);
 	playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 }
 

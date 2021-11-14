@@ -94,7 +94,7 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 	int iteration = 0;
 	FVector projectedLocation;
 
-	while (!result)
+	while (!result && iteration < 10)
 	{
 		iteration++;
 
