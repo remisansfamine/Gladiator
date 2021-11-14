@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ActorInterComponent.h"
 #include "LifeComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLifeDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLifeChangedDelegate, int, newLife);
 
 UCLASS( ClassGroup=(Custom), Blueprintable, meta=(BlueprintSpawnableComponent) )
 class GLADIATORGAME_API ULifeComponent : public UActorComponent
@@ -16,8 +18,10 @@ class GLADIATORGAME_API ULifeComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
 	int life;
 
-	FTimerHandle invicibleTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
+	int maxLife = 5;
 
+	FTimerHandle invicibleTimer;
 
 	bool isInvicible;
 
@@ -28,9 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Life, meta = (AllowPrivateAccess = "true"))
 	float invicibleCooldown;
 
-	// Sets default values for this component's properties
-	ULifeComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
 	UFUNCTION(BlueprintCallable)
 	void Hurt(int damage);
 	
@@ -38,8 +39,17 @@ public:
 	void Kill();
 
 	void SetLife(int value);
+
+public:
 	int GetLife() { return life; }
-public:	
+	int GetMaxLife() { return maxLife; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetLifePercent() { return (float)life / (float)maxLife; }
+
+	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
+	FLifeChangedDelegate OnLifeChanged;
+
 	UPROPERTY(BlueprintAssignable, Category = "Components|Life")
 	FLifeDelegate OnInvicibilityStop;
 

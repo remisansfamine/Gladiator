@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -12,9 +14,13 @@
 #include "LifeComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AGladiatorGameCharacter::AGladiatorGameCharacter()
+	: Super()
 {
+	bUseControllerRotationRoll = bUseControllerRotationPitch = bUseControllerRotationYaw = false;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PawnIgnoreCam"));
@@ -50,13 +56,9 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
-	lifeComponent = CreateDefaultSubobject<ULifeComponent>("LifeComponent");
-	lifeComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
-	lifeComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
-	lifeComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
+	healthComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
 
 	canMove = true;
-
 }
 
 void AGladiatorGameCharacter::BeginPlay()
@@ -68,8 +70,14 @@ void AGladiatorGameCharacter::BeginPlay()
 		weaponCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
 	}
-}
 
+	if (healthComponent)
+	{
+		healthComponent->OnHurt.AddDynamic(this, &AGladiatorGameCharacter::OnHurt);
+		healthComponent->OnKill.AddDynamic(this, &AGladiatorGameCharacter::OnDeath);
+		healthComponent->OnInvicibilityStop.AddDynamic(this, &AGladiatorGameCharacter::OnInvicibilityStop);
+	}
+}
 
 void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -81,9 +89,9 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 	if (!other)
 		return;
 
-	ULifeComponent* otherLifeComp = other->lifeComponent;
+	ULifeComponent* otherLifeComp = other->healthComponent;
 
-	if (!other->lifeComponent)
+	if (!otherLifeComp)
 		return;
 
 	otherLifeComp->Hurt(1);
@@ -91,6 +99,9 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
 {
+	if (hammer)
+		hammer->SetVectorParameterValueOnMaterials("FlickerColor", attacking * FVector(0.9f, 0.f, 0.f));
+
 	weaponCollider->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }
 
@@ -123,7 +134,9 @@ void AGladiatorGameCharacter::OnHurt()
 
 void AGladiatorGameCharacter::OnDeath()
 {
-   setCameraShake(camShake, 1.25f);
+	isAlive = false;
+
+	setCameraShake(camShake, 1.25f);
 
 	SetAttackState(false);
 	SetState(ECharacterState::IDLE);
@@ -153,26 +166,27 @@ void AGladiatorGameCharacter::SetState(ECharacterState state)
 
 void AGladiatorGameCharacter::Attack()
 {
-	if (characterState == ECharacterState::ATTACKING)
+	if (!canAttack)
 		return;
 
-	canMove = false;
+	canDefend = canAttack = canMove = false;
 	SetState(ECharacterState::ATTACKING);
 }
 
 void AGladiatorGameCharacter::Defend(bool defending)
 {
-	if (characterState == ECharacterState::ATTACKING)
+	if (!canDefend)
 		return;
 
 	canMove = true;
+	canAttack = !defending;
 	SetState(defending ? ECharacterState::DEFENDING : ECharacterState::IDLE);
 }
 
 void AGladiatorGameCharacter::Idle()
 {
-	canMove = true;
 	SetState(ECharacterState::IDLE);
+	canMove = canDefend = canAttack = true;
 }
 
 void AGladiatorGameCharacter::MoveForward(float Value)
@@ -217,15 +231,20 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 	TArray<AActor*> gladiators;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGladiatorGameCharacter::StaticClass(), gladiators);
 
-	TArray<AActor*> validGladiators;
-	for (AActor* gladiator : gladiators)
+	TArray<AGladiatorGameCharacter*> validGladiators;
+	for (AActor* actor : gladiators)
 	{
-		if (gladiator == this)
+		if (actor == this)
 			continue;
 		
-		float distSquared = GetSquaredDistanceTo(gladiator);
+		float distSquared = GetSquaredDistanceTo(actor);
 
-		if (GetSquaredDistanceTo(gladiator) < minDistSquared || GetSquaredDistanceTo(gladiator) > maxDistSquared)
+		if (GetSquaredDistanceTo(actor) < minDistSquared || GetSquaredDistanceTo(actor) > maxDistSquared)
+			continue;
+
+		AGladiatorGameCharacter* gladiator = Cast<AGladiatorGameCharacter>(actor);
+
+		if (!gladiator->isAlive)
 			continue;
 
 		validGladiators.Add(gladiator);
@@ -234,14 +253,29 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 	if (validGladiators.Num() == 0)
 		return nullptr;
 
-	validGladiators.Sort([this](const AActor& A, const AActor& B)
+	validGladiators.Sort([this](const AGladiatorGameCharacter& A, const AGladiatorGameCharacter& B)
 	{
 		float distA = GetDistanceTo(&A);
 		float distB = GetDistanceTo(&B);
 		return distA < distB;
 	});
 
-	AActor* validActor = validGladiators[0];
+	return validGladiators[0];
+}
 
-	return Cast<AGladiatorGameCharacter>(validActor);
+void AGladiatorGameCharacter::LookAtTarget(AActor* target, float lookSpeed)
+{
+	FVector toLookAt = target->GetActorLocation() - GetActorLocation();
+	FRotator lookAtRot = toLookAt.Rotation();
+
+	FRotator initialActorRot = GetActorRotation(), actorLookAt = initialActorRot;
+	FRotator initialControllerRot = Controller->GetControlRotation(), controllerLookAt = initialControllerRot;
+
+	controllerLookAt.Yaw = actorLookAt.Yaw = lookAtRot.Yaw;
+
+	actorLookAt = UKismetMathLibrary::RInterpTo(initialActorRot, actorLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+	controllerLookAt = UKismetMathLibrary::RInterpTo(controllerLookAt, controllerLookAt, GetWorld()->GetDeltaSeconds(), lookSpeed);
+
+	SetActorRotation(actorLookAt);
+	Controller->SetControlRotation(controllerLookAt);
 }
