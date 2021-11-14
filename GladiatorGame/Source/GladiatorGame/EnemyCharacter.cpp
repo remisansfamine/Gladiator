@@ -11,8 +11,8 @@
 AEnemyCharacter::AEnemyCharacter()
 	: AGladiatorGameCharacter()
 {
-	lifeComponent->SetLife(3);
-	lifeComponent->invicibleCooldown = 0.5f;
+	healthComponent->SetLife(3);
+	healthComponent->invicibleCooldown = 0.5f;
 }
 
 void AEnemyCharacter::BeginPlay()

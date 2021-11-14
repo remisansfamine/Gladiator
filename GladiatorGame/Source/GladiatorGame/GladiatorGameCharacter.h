@@ -46,9 +46,6 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnLifeChanged(int newLife);
-
-	UFUNCTION()
 	void OnInvicibilityStop();
 
 	UFUNCTION()
@@ -99,7 +96,7 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Life", meta = (AllowPrivateAccess = "true"))
-	class ULifeComponent* lifeComponent = nullptr;
+	class ULifeComponent* healthComponent;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Attack();

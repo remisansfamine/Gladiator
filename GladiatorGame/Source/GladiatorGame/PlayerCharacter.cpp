@@ -19,8 +19,8 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	lifeComponent->SetLife(5);
-	lifeComponent->invicibleCooldown = 1.f;
+	healthComponent->SetLife(5);
+	healthComponent->invicibleCooldown = 1.f;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
