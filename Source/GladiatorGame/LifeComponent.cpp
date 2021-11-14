@@ -3,13 +3,6 @@
 
 #include "LifeComponent.h"
 
-// Sets default values for this component's properties
-ULifeComponent::ULifeComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-
-}
-
 void ULifeComponent::Hurt(int damage) 
 { 
 	if (isInvicible)
@@ -45,6 +38,9 @@ void ULifeComponent::Kill()
 void ULifeComponent::SetLife(int value)
 {
 	life = value;
+
+	if (OnLifeChanged.IsBound())
+		OnLifeChanged.Broadcast(life);
 
 	if (life <= 0)
 		Kill();
