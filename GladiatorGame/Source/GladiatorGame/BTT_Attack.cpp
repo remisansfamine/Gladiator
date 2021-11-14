@@ -3,6 +3,7 @@
 
 #include "BTT_Attack.h"
 #include "AIController.h"
+#include "AIC_Enemy.h"
 #include "EnemyCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -14,16 +15,9 @@ UBTT_Attack::UBTT_Attack(const FObjectInitializer& ObjectInitializer) : Super(Ob
 
 EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	//get NPC
-	const AAIController* cont = OwnerComp.GetAIOwner();
-
-	FString debug = cont->GetBlackboardComponent()->GetValueAsString(GetSelectedBlackboardKey());
-
-	//test to see if the NPC class supports the ICombatInterface interface
-	if (const AEnemyCharacter* npc = Cast<AEnemyCharacter>(cont->GetPawn()))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, debug);
-	}
+	AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	enemyCharacter->Attack();
+	OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 7);
 
 	return EBTNodeResult::Succeeded;
 }

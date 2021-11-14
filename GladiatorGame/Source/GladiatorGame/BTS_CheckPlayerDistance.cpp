@@ -14,29 +14,32 @@ UBTS_CheckPlayerDistance::UBTS_CheckPlayerDistance(const FObjectInitializer& Obj
 
 bool UBTS_CheckPlayerDistance::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	const AAIController* cont = OwnerComp.GetAIOwner();
-	APawn* enemyPawn = cont->GetPawn();
-	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
-	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
+	float safePlayerDistanceMin = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMin");
+	float safePlayerDistanceMax = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMax");
 
 	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
-	float distance = FVector::Dist(enemyCharacter->GetActorLocation(), playerCharacter->GetActorLocation());
+	float distance = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("Distance");
+
+	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
 
-	if (enumId != 4)
+	if (enumId != 5)
 	{
-		if (distance <= enemyCharacter->safePlayerDistanceMin)
+		if (distance <= safePlayerDistanceMin)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("distance Failed, Distance = %f"), distance);
 
 			enemyController->StopMovement();
-			OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 4);
+			OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 5);
 			return false;
 		}
 	}
-	else
+	else //GoBack
 	{
-		if (distance > enemyCharacter->safePlayerDistanceMin + (enemyCharacter->safePlayerDistanceMax - enemyCharacter->safePlayerDistanceMin)/2)
+		float distanceMin = safePlayerDistanceMin + 
+			(safePlayerDistanceMax - safePlayerDistanceMin) / 2;
+
+		if (distance > distanceMin)
 		{
 			enemyController->StopMovement();
 			OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 0);

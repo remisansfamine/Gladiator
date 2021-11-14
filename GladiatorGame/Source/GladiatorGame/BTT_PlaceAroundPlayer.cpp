@@ -56,7 +56,6 @@ FVector GetRandomPointInSemiTorus(float radiusMin, float radiusMax, FVector unit
 
 	float cX = FMath::Sin(randomAngle);
 	float cY = FMath::Cos(randomAngle);
-	UE_LOG(LogTemp, Warning, TEXT("cX = %f, cY = %f"), cX, cY);
 
 	FVector ringPos = FVector(cX, cY, 0);
 	ringPos *= FMath::RandRange(radiusMin, radiusMax);
@@ -74,23 +73,17 @@ FVector GetRandomPointInSemiTorus(float radiusMin, float radiusMax, FVector unit
 
 EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	float safePlayerDistanceMin = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMin");
+	float safePlayerDistanceMax = OwnerComp.GetBlackboardComponent()->GetValueAsFloat("safePlayerDistanceMax");
+
 	const AAIController* cont = OwnerComp.GetAIOwner();
 
 	APawn* enemyPawn = cont->GetPawn();
-	if (!enemyPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("enemyPawn Failed"));
-		return EBTNodeResult::Failed;
-	}
 
 	const AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(enemyPawn);
 	AAIController* enemyController = Cast<AAIController>(enemyCharacter->GetController());
 
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("PlayerActor"));
-	if (!playerCharacter)
-	{
-		EBTNodeResult::Failed;
-	}
 
 	FVector enemyLocation = enemyPawn->GetActorLocation();
 	FVector playerLocation = playerCharacter->GetActorLocation();
@@ -98,41 +91,36 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 	playerEnemyDir.Normalize();
 
 	bool result = false;
+	int iteration = 0;
 	FVector projectedLocation;
 
 	while (!result)
 	{
-		FVector randomLocation = GetRandomPointInSemiTorus(enemyCharacter->safePlayerDistanceMin,
-			enemyCharacter->safePlayerDistanceMax, playerEnemyDir);
+		iteration++;
+
+		FVector randomLocation = GetRandomPointInSemiTorus(safePlayerDistanceMin,
+			safePlayerDistanceMax, playerEnemyDir);
 
 		projectedLocation = ProjectPointOnNavigableLocation(randomLocation + playerLocation, enemyPawn);
 
 		float dist = FVector::Dist(projectedLocation, playerLocation);
-		if (dist < enemyCharacter->safePlayerDistanceMin || dist > enemyCharacter->safePlayerDistanceMax)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("distance Failed, Distance = %f"), dist);
+		if (dist < safePlayerDistanceMin || dist > safePlayerDistanceMax)
 			continue;
-		}
 
-		FHitResult hit;
-		if (enemyPawn->GetWorld()->LineTraceSingleByChannel(hit, projectedLocation, playerLocation, ECollisionChannel::ECC_Pawn))
-		{
-			if (APlayerCharacter* pawnCast = Cast<APlayerCharacter>(hit.Actor))
-				result = true;
-			else
-				continue;
-		}
+		if (checkIfPawnEnemyIsFront(projectedLocation, playerLocation, enemyPawn))
+			continue;
+		
+		if (checkIfPawnIsInSphere(enemyCharacter->wantedRoomRadius, projectedLocation, enemyPawn))
+			continue;
 
-		if (checkIfPawnIsInSphere(80, enemyCharacter->GetActorLocation(), projectedLocation, enemyPawn))
-			result = true;
-
+		result = true;
 	}
 
 	DrawDebugSphere(enemyPawn->GetWorld(), projectedLocation, 10.f, 24, FColor::Red, false, 10.f);
 
-	enemyController->MoveToLocation(projectedLocation, 0);
+	enemyController->MoveToLocation(projectedLocation);
 
-	OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 2);
+	OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 3);
 	OwnerComp.GetBlackboardComponent()->SetValueAsVector("currentTarget", projectedLocation);
 
 	return EBTNodeResult::Succeeded;
