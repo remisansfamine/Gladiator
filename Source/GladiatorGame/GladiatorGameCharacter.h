@@ -28,15 +28,18 @@ protected:
 	class USkeletalMeshComponent* hammer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* weaponCollider;
+	class USphereComponent* attackCollider;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* shield;
+
+	void TakeDamage(int damage, const FVector& senderPosition);
 
 	bool canMove = true;
 	bool canAttack = true;
 	bool canDefend = true;
 	bool isAlive = true;
+	bool isBlocking = false;
 
 public:
 	AGladiatorGameCharacter();
@@ -72,7 +75,10 @@ protected:
 	void SetState(ECharacterState state);
 
 	UFUNCTION(BlueprintCallable)
-	virtual void Defend(bool defending);
+	virtual void DefendOn();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void DefendOff();
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Idle();

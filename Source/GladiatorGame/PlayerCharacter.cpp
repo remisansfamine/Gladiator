@@ -12,8 +12,6 @@ APlayerCharacter::APlayerCharacter()
 	: AGladiatorGameCharacter()
 {
 	ActivateCamera();
-
-
 }
 
 void APlayerCharacter::BeginPlay()
@@ -52,8 +50,8 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
 
-	PlayerInputComponent->BindAction<FDefend>("Defend", IE_Pressed, this, &APlayerCharacter::Defend, true);
-	PlayerInputComponent->BindAction<FDefend>("Defend", IE_Released, this, &APlayerCharacter::Defend, false);
+	PlayerInputComponent->BindAction("Defend", IE_Pressed, this, &APlayerCharacter::DefendOn);
+	PlayerInputComponent->BindAction("Defend", IE_Released, this, &APlayerCharacter::DefendOff);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
