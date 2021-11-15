@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GladiatorGameState.h"
 
 APlayerCharacter::APlayerCharacter() 
 	: AGladiatorGameCharacter()
@@ -21,6 +22,17 @@ void APlayerCharacter::BeginPlay()
 
 	healthComponent->SetLife(5);
 	healthComponent->invicibleCooldown = 1.f;
+	healthComponent->OnKill.AddDynamic(this, &APlayerCharacter::PlayerDeath);
+}
+
+void APlayerCharacter::PlayerDeath()
+{
+	AGladiatorGameState* gameState = Cast<AGladiatorGameState>(GetWorld()->GetGameState());
+	if (gameState)
+	{
+		if (gameState->OnKillPlayer.IsBound())
+			gameState->OnKillPlayer.Broadcast();
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

@@ -2,6 +2,7 @@
 
 #include "GladiatorGameGameMode.h"
 #include "GladiatorGameCharacter.h"
+#include "GladiatorGameState.h"
 #include "UObject/ConstructorHelpers.h"
 
 AGladiatorGameGameMode::AGladiatorGameGameMode()
@@ -11,5 +12,11 @@ AGladiatorGameGameMode::AGladiatorGameGameMode()
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<AGameStateBase> AGameStateBPClass(TEXT("/Game/Blueprints/GameState"));
+	if (AGameStateBPClass.Class != NULL)
+	{
+		GameStateClass = AGameStateBPClass.Class;
 	}
 }
