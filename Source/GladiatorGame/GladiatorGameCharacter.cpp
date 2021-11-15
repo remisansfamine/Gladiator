@@ -35,30 +35,26 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>("CameraBoom");
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	DeactivateCamera();
 
 	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>("FollowCamera");
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	hammer = CreateDefaultSubobject<USkeletalMeshComponent>("Hammer");
+	hammer = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hammer"));
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
 
-	weaponCollider = CreateDefaultSubobject<USphereComponent>("Sphere collider");
-	weaponCollider->SetupAttachment(hammer, TEXT("ColliderSocket"));
-	weaponCollider->SetGenerateOverlapEvents(true);
+	attackCollider = CreateDefaultSubobject<USphereComponent>(TEXT("WeaponCollider"));
+	attackCollider->SetupAttachment(hammer, TEXT("ColliderSocket"));
+	attackCollider->SetGenerateOverlapEvents(true);
 
-	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
+	shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Shield"));
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
-
-	shieldCollider = CreateDefaultSubobject<USphereComponent>("Shield collider");
-	shieldCollider->SetupAttachment(shield, TEXT("ColliderSocket"));
-	shieldCollider->SetGenerateOverlapEvents(true);
 
 	healthComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
 
@@ -69,15 +65,10 @@ void AGladiatorGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (weaponCollider)
+	if (attackCollider)
 	{
-		weaponCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
-	}
-
-	if (shieldCollider)
-	{
-		shieldCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		attackCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		attackCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
 	}
 
 	if (healthComponent)
@@ -95,15 +86,22 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 
 	AGladiatorGameCharacter* other = Cast<AGladiatorGameCharacter>(OtherActor);
 
-	if (!other)
+	if (other)
+		other->TakeDamage(1, GetActorLocation());
+}
+
+void AGladiatorGameCharacter::TakeDamage(int damage, const FVector& senderPosition)
+{
+	if (!isBlocking)
+	{
+		healthComponent->Hurt(1);
 		return;
+	}
 
-	ULifeComponent* otherLifeComp = other->healthComponent;
+	FVector senderDirection = (senderPosition - GetActorLocation()).GetSafeNormal();
 
-	if (!otherLifeComp)
-		return;
-
-	otherLifeComp->Hurt(1);
+	if (FVector::DotProduct(senderDirection, GetActorForwardVector()) <= 0.25f)
+		healthComponent->Hurt(1);
 }
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
@@ -111,7 +109,7 @@ void AGladiatorGameCharacter::SetAttackState(bool attacking)
 	if (hammer)
 		hammer->SetVectorParameterValueOnMaterials("FlickerColor", attacking * FVector(0.9f, 0.f, 0.f));
 
-	weaponCollider->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+	attackCollider->SetCollisionEnabled(attacking ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }
 
 void AGladiatorGameCharacter::ActivateCamera() 
@@ -189,6 +187,7 @@ void AGladiatorGameCharacter::Defend(bool defending)
 
 	canMove = true;
 	canAttack = !defending;
+	isBlocking = !isBlocking;
 	SetState(defending ? ECharacterState::DEFENDING : ECharacterState::IDLE);
 }
 
