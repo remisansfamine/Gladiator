@@ -11,8 +11,6 @@ APlayerCharacter::APlayerCharacter()
 	: AGladiatorGameCharacter()
 {
 	ActivateCamera();
-
-
 }
 
 void APlayerCharacter::BeginPlay()

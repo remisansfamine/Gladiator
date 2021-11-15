@@ -104,7 +104,7 @@ void AGladiatorGameCharacter::TakeDamage(int damage, const FVector& senderPositi
 
 	if (FVector::DotProduct(senderDirection, GetActorForwardVector()) > 0.25f)
 	{
-		setCameraShake(camShake, 1.f);
+		setCameraShake(camShake, 2.f);
 		return;
 	}
 
@@ -144,7 +144,7 @@ void AGladiatorGameCharacter::OnHurt()
 {
 	GetMesh()->SetVectorParameterValueOnMaterials("FlickerColor", FVector(1.f, 0.f, 0.f));
 
-	setCameraShake(camShake, 0.75f);
+	setCameraShake(camShake, 0.5f);
 }
 
 void AGladiatorGameCharacter::OnDeath()
