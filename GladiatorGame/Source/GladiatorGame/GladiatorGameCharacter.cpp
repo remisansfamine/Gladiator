@@ -98,10 +98,14 @@ void AGladiatorGameCharacter::TakeDamage(int damage, const FVector& senderPositi
 		return;
 	}
 
+	DefendOff();
+
 	FVector senderDirection = (senderPosition - GetActorLocation()).GetSafeNormal();
 
-	if (FVector::DotProduct(senderDirection, GetActorForwardVector()) <= 0.25f)
-		healthComponent->Hurt(1);
+	if (FVector::DotProduct(senderDirection, GetActorForwardVector()) > 0.25f)
+		return;
+
+	healthComponent->Hurt(1);
 }
 
 void AGladiatorGameCharacter::SetAttackState(bool attacking)
@@ -180,15 +184,23 @@ void AGladiatorGameCharacter::Attack()
 	SetState(ECharacterState::ATTACKING);
 }
 
-void AGladiatorGameCharacter::Defend(bool defending)
+void AGladiatorGameCharacter::DefendOn()
 {
-	if (!canDefend)
+	if (!canDefend || isBlocking)
 		return;
 
 	canMove = true;
-	canAttack = !defending;
-	isBlocking = !isBlocking;
-	SetState(defending ? ECharacterState::DEFENDING : ECharacterState::IDLE);
+	canAttack = false;
+	isBlocking = true;
+	SetState(ECharacterState::DEFENDING);
+}
+
+void AGladiatorGameCharacter::DefendOff()
+{
+	canMove = true;
+	canAttack = true;
+	isBlocking = false;
+	SetState(ECharacterState::IDLE);
 }
 
 void AGladiatorGameCharacter::Idle()

@@ -75,7 +75,10 @@ protected:
 	void SetState(ECharacterState state);
 
 	UFUNCTION(BlueprintCallable)
-	virtual void Defend(bool defending);
+	virtual void DefendOn();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void DefendOff();
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Idle();
