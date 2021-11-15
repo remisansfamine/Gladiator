@@ -111,7 +111,7 @@ bool checkIfPawnIsInSphere(float radius, const FVector& center, APawn* ownPawn)
 	if (ownPawn->GetWorld()->OverlapMultiByObjectType(overlaps, center, FQuat::Identity, 
 		FCollisionObjectQueryParams::AllObjects, FCollisionShape::MakeSphere(radius)))
 	{
-		DrawDebugSphere(ownPawn->GetWorld(), center, radius, 6, FColor::Green, false, 5.f);
+		//DrawDebugSphere(ownPawn->GetWorld(), center, radius, 6, FColor::Green, false, 5.f);
 
 		for (FOverlapResult overlap : overlaps)
 		{
@@ -154,7 +154,7 @@ bool checkIfPawnEnemyIsFront(const FVector& start, const FVector& end, const APa
 		}
 	}
 
-	DrawDebugLine(ownPawn->GetWorld(), start, end, FColor::Green, false, 0.1f);
+	//DrawDebugLine(ownPawn->GetWorld(), start, end, FColor::Green, false, 0.1f);
 
 	return false;
 }
