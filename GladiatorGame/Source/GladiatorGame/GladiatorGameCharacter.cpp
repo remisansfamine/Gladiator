@@ -149,11 +149,11 @@ void AGladiatorGameCharacter::OnDeath()
 
 	hammer->DetachFromParent(true);
 	hammer->SetSimulatePhysics(true);
-	hammer->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
+	hammer->SetCollisionProfileName(TEXT("Props"));
 
 	shield->DetachFromParent(true);
 	shield->SetSimulatePhysics(true);
-	shield->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
+	shield->SetCollisionProfileName(TEXT("Props"));
 }
 
 void AGladiatorGameCharacter::SetState(ECharacterState state)
