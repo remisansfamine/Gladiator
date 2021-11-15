@@ -56,6 +56,10 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield = CreateDefaultSubobject<USkeletalMeshComponent>("Shield");
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
+	shieldCollider = CreateDefaultSubobject<USphereComponent>("Shield collider");
+	shieldCollider->SetupAttachment(shield, TEXT("ColliderSocket"));
+	shieldCollider->SetGenerateOverlapEvents(true);
+
 	healthComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
 
 	canMove = true;
@@ -69,6 +73,11 @@ void AGladiatorGameCharacter::BeginPlay()
 	{
 		weaponCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		weaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGladiatorGameCharacter::OverlapCallback);
+	}
+
+	if (shieldCollider)
+	{
+		shieldCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	if (healthComponent)
