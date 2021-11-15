@@ -9,7 +9,7 @@
 #include "AIC_Enemy.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIEnemyManager.h"
-
+#include "GladiatorGameState.h"
 
 
 AEnemyCharacter::AEnemyCharacter()
@@ -41,6 +41,13 @@ void AEnemyCharacter::OnDeathEnemy()
 		enemyController->GetBlackboardComponent()->SetValueAsEnum("MovingState", 8);
 
 		enemyController->aiEnemyManager->DeleteEnemy(enemyController);
+	}
+
+	AGladiatorGameState* gameState = Cast<AGladiatorGameState>(GetWorld()->GetGameState());
+	if (gameState)
+	{
+		if (gameState->OnKillEnemy.IsBound())
+			gameState->OnKillEnemy.Broadcast();
 	}
 }
 

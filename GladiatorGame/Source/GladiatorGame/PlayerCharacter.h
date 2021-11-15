@@ -27,6 +27,8 @@ class GLADIATORGAME_API APlayerCharacter : public AGladiatorGameCharacter
 
 	bool isLocking = false;
 
+	UFUNCTION()
+	void PlayerDeath();
 public:
 	APlayerCharacter();
 
@@ -41,6 +43,7 @@ public:
 	void SetCameraLockOff();
 
 	void Tick(float DeltaTime) override;
+
 
 protected:
 	// APawn interface
