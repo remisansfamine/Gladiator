@@ -4,9 +4,8 @@
 #include "BTS_MovingService.h"
 #include "EnemyCharacter.h"
 #include "PlayerCharacter.h"
-#include "AIC_Enemy.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "AIC_Enemy.h"
 
 UBTS_MovingService::UBTS_MovingService(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -22,23 +21,4 @@ void UBTS_MovingService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat("Distance", distance);
 
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat("DeltaTime", DeltaSeconds);
-
-	static int oldEnumId;
-	int enumId = OwnerComp.GetBlackboardComponent()->GetValueAsEnum("MovingState");
-
-	if (enumId != oldEnumId)
-	{
-		if (enumId == 5 || enumId == 4)
-		{
-			enemyCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
-			enemyCharacter->bUseControllerRotationYaw = false;
-		}
-		else
-		{
-			enemyCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
-			enemyCharacter->bUseControllerRotationYaw = true;
-		}
-
-		oldEnumId = enumId;
-	}
 }
