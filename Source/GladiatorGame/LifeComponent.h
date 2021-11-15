@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ActorInterComponent.h"
 #include "LifeComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLifeDelegate);
