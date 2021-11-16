@@ -4,9 +4,9 @@ Third Person beat-them all made with Unreal Engine 2.26.
 
 # Controls
 - **WASD** : Move in the camera space.
-- **Left click** : Attack
-- **Right click** : Defend
-- **Middle click** : Lock-on on the nearest enemy
+- **Left click** : Melee attack.
+- **Right click** : Defend.
+- **Middle click** : Lock-on on the nearest enemy.
 
 ***Know bugs***
 ===
@@ -15,7 +15,7 @@ Third Person beat-them all made with Unreal Engine 2.26.
 
 ***Issues during development***
 ===
-- Several times the components of the gladiators  become null causing us to lose days of development
+- Several times the components of the gladiators  become null causing us to lose days of development.
 
 ***References***
 ===
