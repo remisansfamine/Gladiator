@@ -35,16 +35,16 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	cameraBoomComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	cameraBoomComp->SetupAttachment(RootComponent);
+	cameraBoomComp->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	cameraBoomComp->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	DeactivateCamera();
 
 	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	followCameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	followCameraComp->SetupAttachment(cameraBoomComp, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	followCameraComp->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	hammer = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hammer"));
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
@@ -119,12 +119,12 @@ void AGladiatorGameCharacter::SetAttackState(bool attacking)
 
 void AGladiatorGameCharacter::ActivateCamera() 
 { 
-	CameraBoom->Activate(); 
+	cameraBoomComp->Activate();
 }
 
 void AGladiatorGameCharacter::DeactivateCamera() 
 { 
-	CameraBoom->Deactivate(); 
+	cameraBoomComp->Deactivate();
 }
 
 void AGladiatorGameCharacter::OnInvicibilityStop()
@@ -154,7 +154,12 @@ void AGladiatorGameCharacter::OnDeath()
 	SetAttackState(false);
 	SetState(ECharacterState::IDLE);
 
+	GetCharacterMovement()->Deactivate();
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetSimulatePhysics(false);
+	GetCapsuleComponent()->SetEnableGravity(false);
+
 	GetMesh()->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
 	GetMesh()->SetSimulatePhysics(true);
 
