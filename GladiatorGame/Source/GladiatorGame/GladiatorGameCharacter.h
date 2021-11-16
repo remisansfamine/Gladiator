@@ -35,12 +35,6 @@ protected:
 
 	void TakeDamage(int damage, const FVector& senderPosition);
 
-	bool canMove = true;
-	bool canAttack = true;
-	bool canDefend = true;
-	bool isAlive = true;
-	bool isBlocking = false;
-
 public:
 	AGladiatorGameCharacter();
 
@@ -70,7 +64,7 @@ protected:
 	void Move(const FVector& direction, float value);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State, meta = (AllowPrivateAccess = "true"))
-	ECharacterState characterState;
+	ECharacterState characterState = ECharacterState::IDLE;
 
 	void SetState(ECharacterState state);
 
@@ -101,6 +95,11 @@ protected:
 	void LookAtTarget(AActor* target, float lookSpeed);
 
 public:
+	bool canDefend() { return characterState == ECharacterState::IDLE || characterState == ECharacterState::ATTACKING; }
+	bool canAttack() { return characterState == ECharacterState::IDLE; }
+	bool canMove() { return characterState == ECharacterState::DEFENDING || characterState == ECharacterState::IDLE; }
+	bool isAlive() { return characterState != ECharacterState::DEAD;  }
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Life", meta = (AllowPrivateAccess = "true"))
 	class ULifeComponent* healthComponent;
 

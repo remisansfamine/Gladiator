@@ -63,7 +63,7 @@ int AAIEnemyManager::ClosestEnemy()
 int AAIEnemyManager::LastEnemy()
 {
 	
-	if (lastEnemyIndex == -1 || enemies[lastEnemyIndex]->GetBlackboardComponent()->GetValueAsFloat("Distance") > safePlayerDistanceMax)
+	if (lastEnemyIndex == -1 || lastEnemyIndex >= enemies.Num() || enemies[lastEnemyIndex]->GetBlackboardComponent()->GetValueAsFloat("Distance") > safePlayerDistanceMax)
 		return -1;
 
 	return lastEnemyIndex;
