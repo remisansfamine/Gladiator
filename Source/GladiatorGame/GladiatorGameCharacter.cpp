@@ -57,8 +57,6 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
 	healthComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
-
-	canMove = true;
 }
 
 void AGladiatorGameCharacter::BeginPlay()
@@ -92,7 +90,7 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 
 void AGladiatorGameCharacter::TakeDamage(int damage, const FVector& senderPosition)
 {
-	if (!isBlocking)
+	if (characterState != ECharacterState::DEFENDING)
 	{
 		healthComponent->Hurt(1);
 		return;
@@ -149,14 +147,12 @@ void AGladiatorGameCharacter::OnHurt()
 
 void AGladiatorGameCharacter::OnDeath()
 {
-	isAlive = false;
+	characterState = ECharacterState::DEAD;
 
 	setCameraShake(camShake, 1.25f);
 
 	SetAttackState(false);
 	SetState(ECharacterState::IDLE);
-
-	canMove = false;
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
@@ -181,36 +177,25 @@ void AGladiatorGameCharacter::SetState(ECharacterState state)
 
 void AGladiatorGameCharacter::Attack()
 {
-	if (!canAttack)
+	if (!canAttack())
 		return;
 
-	canDefend = canAttack = canMove = false;
 	SetState(ECharacterState::ATTACKING);
 }
 
 void AGladiatorGameCharacter::DefendOn()
 {
-	if (!canDefend || isBlocking)
-		return;
-
-	canMove = true;
-	canAttack = false;
-	isBlocking = true;
 	SetState(ECharacterState::DEFENDING);
 }
 
 void AGladiatorGameCharacter::DefendOff()
 {
-	canMove = true;
-	canAttack = true;
-	isBlocking = false;
 	SetState(ECharacterState::IDLE);
 }
 
 void AGladiatorGameCharacter::Idle()
 {
 	SetState(ECharacterState::IDLE);
-	canMove = canDefend = canAttack = true;
 }
 
 void AGladiatorGameCharacter::MoveForward(float Value)
@@ -225,7 +210,7 @@ void AGladiatorGameCharacter::MoveRight(float Value)
 
 void AGladiatorGameCharacter::Move(EAxis::Type axis, float value)
 {
-	if (!canMove || !Controller || value == 0.0f )
+	if (!canMove() || !Controller || value == 0.0f )
 		return;
 
 	// find out which way is right
@@ -239,7 +224,7 @@ void AGladiatorGameCharacter::Move(EAxis::Type axis, float value)
 
 void AGladiatorGameCharacter::Move(const FVector& direction, float value)
 {
-	if (!canMove || value == 0.0f)
+	if (!canMove() || value == 0.0f)
 		return;
 
 	AddMovementInput(direction, value);
@@ -268,7 +253,7 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 
 		AGladiatorGameCharacter* gladiator = Cast<AGladiatorGameCharacter>(actor);
 
-		if (!gladiator->isAlive)
+		if (!gladiator->isAlive())
 			continue;
 
 		validGladiators.Add(gladiator);
