@@ -18,11 +18,11 @@ class AGladiatorGameCharacter : public ACharacter
 protected:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	class USpringArmComponent* cameraBoomComp;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
+	class UCameraComponent* followCameraComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* hammer;
@@ -34,12 +34,6 @@ protected:
 	class USkeletalMeshComponent* shield;
 
 	void TakeDamage(int damage, const FVector& senderPosition);
-
-	bool canMove = true;
-	bool canAttack = true;
-	bool canDefend = true;
-	bool isAlive = true;
-	bool isBlocking = false;
 
 public:
 	AGladiatorGameCharacter();
@@ -70,7 +64,7 @@ protected:
 	void Move(const FVector& direction, float value);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State, meta = (AllowPrivateAccess = "true"))
-	ECharacterState characterState;
+	ECharacterState characterState = ECharacterState::IDLE;
 
 	void SetState(ECharacterState state);
 
@@ -101,15 +95,20 @@ protected:
 	void LookAtTarget(AActor* target, float lookSpeed);
 
 public:
+	bool canDefend() { return characterState == ECharacterState::IDLE || characterState == ECharacterState::ATTACKING; }
+	bool canAttack() { return characterState == ECharacterState::IDLE; }
+	bool canMove() { return characterState == ECharacterState::DEFENDING || characterState == ECharacterState::IDLE; }
+	bool isAlive() { return characterState != ECharacterState::DEAD;  }
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Life", meta = (AllowPrivateAccess = "true"))
 	class ULifeComponent* healthComponent;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Attack();
 
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoomComp; }
 	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }	
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCameraComp; }	
 
 	UPROPERTY(BlueprintAssignable, Category = "Character|State")
 	FCharacterState OnStateChanged;
