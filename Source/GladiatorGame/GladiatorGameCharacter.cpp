@@ -35,16 +35,16 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	cameraBoomComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	cameraBoomComp->SetupAttachment(RootComponent);
+	cameraBoomComp->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	cameraBoomComp->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	DeactivateCamera();
 
 	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	followCameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	followCameraComp->SetupAttachment(cameraBoomComp, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	followCameraComp->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	hammer = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hammer"));
 	hammer->SetupAttachment(GetMesh(), TEXT("WeaponPoint"));
@@ -57,8 +57,6 @@ AGladiatorGameCharacter::AGladiatorGameCharacter()
 	shield->SetupAttachment(GetMesh(), TEXT("DualWeaponPoint"));
 
 	healthComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("LifeComp"));
-
-	canMove = true;
 }
 
 void AGladiatorGameCharacter::BeginPlay()
@@ -92,7 +90,7 @@ void AGladiatorGameCharacter::OverlapCallback(UPrimitiveComponent* OverlappedCom
 
 void AGladiatorGameCharacter::TakeDamage(int damage, const FVector& senderPosition)
 {
-	if (!isBlocking)
+	if (characterState != ECharacterState::DEFENDING)
 	{
 		healthComponent->Hurt(1);
 		return;
@@ -121,12 +119,12 @@ void AGladiatorGameCharacter::SetAttackState(bool attacking)
 
 void AGladiatorGameCharacter::ActivateCamera() 
 { 
-	CameraBoom->Activate(); 
+	cameraBoomComp->Activate();
 }
 
 void AGladiatorGameCharacter::DeactivateCamera() 
 { 
-	CameraBoom->Deactivate(); 
+	cameraBoomComp->Deactivate();
 }
 
 void AGladiatorGameCharacter::OnInvicibilityStop()
@@ -149,16 +147,19 @@ void AGladiatorGameCharacter::OnHurt()
 
 void AGladiatorGameCharacter::OnDeath()
 {
-	isAlive = false;
+	characterState = ECharacterState::DEAD;
 
 	setCameraShake(camShake, 1.25f);
 
 	SetAttackState(false);
 	SetState(ECharacterState::IDLE);
 
-	canMove = false;
+	GetCharacterMovement()->Deactivate();
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetSimulatePhysics(false);
+	GetCapsuleComponent()->SetEnableGravity(false);
+
 	GetMesh()->SetCollisionProfileName(TEXT("RagdollIgnoreCam"));
 	GetMesh()->SetSimulatePhysics(true);
 
@@ -181,36 +182,25 @@ void AGladiatorGameCharacter::SetState(ECharacterState state)
 
 void AGladiatorGameCharacter::Attack()
 {
-	if (!canAttack)
+	if (!canAttack())
 		return;
 
-	canDefend = canAttack = canMove = false;
 	SetState(ECharacterState::ATTACKING);
 }
 
 void AGladiatorGameCharacter::DefendOn()
 {
-	if (!canDefend || isBlocking)
-		return;
-
-	canMove = true;
-	canAttack = false;
-	isBlocking = true;
 	SetState(ECharacterState::DEFENDING);
 }
 
 void AGladiatorGameCharacter::DefendOff()
 {
-	canMove = true;
-	canAttack = true;
-	isBlocking = false;
 	SetState(ECharacterState::IDLE);
 }
 
 void AGladiatorGameCharacter::Idle()
 {
 	SetState(ECharacterState::IDLE);
-	canMove = canDefend = canAttack = true;
 }
 
 void AGladiatorGameCharacter::MoveForward(float Value)
@@ -225,7 +215,7 @@ void AGladiatorGameCharacter::MoveRight(float Value)
 
 void AGladiatorGameCharacter::Move(EAxis::Type axis, float value)
 {
-	if (!canMove || !Controller || value == 0.0f )
+	if (!canMove() || !Controller || value == 0.0f )
 		return;
 
 	// find out which way is right
@@ -239,7 +229,7 @@ void AGladiatorGameCharacter::Move(EAxis::Type axis, float value)
 
 void AGladiatorGameCharacter::Move(const FVector& direction, float value)
 {
-	if (!canMove || value == 0.0f)
+	if (!canMove() || value == 0.0f)
 		return;
 
 	AddMovementInput(direction, value);
@@ -268,7 +258,7 @@ AGladiatorGameCharacter* AGladiatorGameCharacter::GetOtherGladiator(float minDis
 
 		AGladiatorGameCharacter* gladiator = Cast<AGladiatorGameCharacter>(actor);
 
-		if (!gladiator->isAlive)
+		if (!gladiator->isAlive())
 			continue;
 
 		validGladiators.Add(gladiator);
