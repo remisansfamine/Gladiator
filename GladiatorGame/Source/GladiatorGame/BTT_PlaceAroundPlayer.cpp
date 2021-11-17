@@ -116,8 +116,6 @@ EBTNodeResult::Type UBTT_PlaceAroundPlayer::ExecuteTask(UBehaviorTreeComponent& 
 		result = true;
 	}
 
-	DrawDebugSphere(enemyPawn->GetWorld(), projectedLocation, 10.f, 24, FColor::Red, false, 10.f);
-
 	enemyController->MoveToLocation(projectedLocation);
 
 	OwnerComp.GetBlackboardComponent()->SetValueAsEnum("MovingState", 3);
